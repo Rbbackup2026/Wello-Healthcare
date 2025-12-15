@@ -25,7 +25,7 @@ import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import axios from "axios";
 import BlogTagForm from "../DailogForm/BlogTagForm";
 
-const BASE_URL = "http://localhost:3000/v1/api";
+const BASE_URL = "https://razobytehealthcare-website-backend-code.onrender.com/v1/api";
 
 const BlogTags = () => {
   const navigate = useNavigate();

@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BlogFormDialog from "../DailogForm/BlogFormDialog";
 
-const API_BASE = "http://localhost:3000/v1/api";
+const API_BASE = "https://razobytehealthcare-website-backend-code.onrender.com/v1/api";
 
 const Blogs = () => {
   const navigate = useNavigate();

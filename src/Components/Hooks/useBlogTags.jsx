@@ -8,7 +8,7 @@ const useBlogTags = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3000/v1/api/tagget");
+      const res = await axios.get("https://razobytehealthcare-website-backend-code.onrender.com/v1/api/tagget");
       setCategories(res.data);
     } catch (error) {
       console.error("Error fetching categories:", error);

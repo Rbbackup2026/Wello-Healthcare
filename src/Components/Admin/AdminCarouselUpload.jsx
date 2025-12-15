@@ -44,7 +44,7 @@ const AdminCarouselUpload = () => {
   const fetchBanners = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:3000/v1/api/getbanner");
+      const res = await axios.get("https://razobytehealthcare-website-backend-code.onrender.com/v1/api/getbanner");
       setBanners(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch banners error:", err);
@@ -55,7 +55,7 @@ const AdminCarouselUpload = () => {
 
   const handleStatusToggle = async (banner) => {
     try {
-      await axios.put(`http://localhost:3000/v1/api/banner/${banner._id}`, {
+      await axios.put(`https://razobytehealthcare-website-backend-code.onrender.com/v1/api/banner/${banner._id}`, {
         isActive: !banner.isActive,
       });
       fetchBanners();
@@ -67,7 +67,7 @@ const AdminCarouselUpload = () => {
   const handleDelete = async (banner) => {
     if (!window.confirm("Are you sure you want to delete this banner?")) return;
     try {
-      await axios.delete(`http://localhost:3000/v1/api/banner/${banner._id}`);
+      await axios.delete(`https://razobytehealthcare-website-backend-code.onrender.com/v1/api/banner/${banner._id}`);
       fetchBanners();
     } catch (err) {
       console.error("Delete error", err);
@@ -156,13 +156,13 @@ const AdminCarouselUpload = () => {
                     <TableCell>
                       <Box
                         component="img"
-                        src={b.image ? `http://localhost:3000${b.image}` : defaultImage}
+                        src={b.image ? `https://razobytehealthcare-website-backend-code.onrender.com${b.image}` : defaultImage}
                         alt={b.title}
                         sx={{ width: 80, height: 50, objectFit: "cover", cursor: "pointer" }}
                         onClick={() => {
                           setSelectedImage(
                             b.image
-                              ? `http://localhost:3000${b.image}`
+                              ? `https://razobytehealthcare-website-backend-code.onrender.com${b.image}`
                               : defaultImage
                           );
                           setImagePreviewOpen(true);

@@ -10,7 +10,7 @@ const useSortOrders = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:3000/v1/api/categories');
+      const response = await axios.get('https://razobytehealthcare-website-backend-code.onrender.com/v1/api/categories');
       if (response.data && Array.isArray(response.data)) {
         const orders = response.data
           .map(category => category.sortOrder)

@@ -86,7 +86,7 @@ function AdminLogin({ setIsAuthenticated }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/v1/api/login",
+        "https://razobytehealthcare-website-backend-code.onrender.com/v1/api/login",
         { email, password },
         {
           headers: {
@@ -194,7 +194,7 @@ function AdminLogin({ setIsAuthenticated }) {
   const testAPI = async () => {
     try {
       console.log("🧪 Testing API connection...");
-      const response = await axios.get("http://localhost:3000/v1/api/authuser");
+      const response = await axios.get("https://razobytehealthcare-website-backend-code.onrender.com/v1/api/authuser");
       console.log("API Test Response:", response.data);
     } catch (error) {
       console.error("API Test Error:", error);

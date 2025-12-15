@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CouponFormDialog from "../DailogForm/CouponFormDialog"; // ✅ Import dialog
 
-const API = "http://localhost:3000/v1/api";
+const API = "https://razobytehealthcare-website-backend-code.onrender.com/v1/api";
 
 const CouponTable = () => {
   const navigate = useNavigate();

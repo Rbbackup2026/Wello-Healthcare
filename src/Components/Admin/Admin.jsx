@@ -16,6 +16,7 @@ import {
   ListItemText,
   Collapse,
 } from "@mui/material";
+
 import {
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
@@ -30,11 +31,15 @@ import {
   LocationOn as LocationIcon,
   Flag as FlagIcon,
   Public as PublicIcon,
+  People as PeopleIcon,
 } from "@mui/icons-material";
+
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import Profile from "../Profile/Profile";
 
 const drawerWidth = 280;
+
+/* ----------------------------- Drawer Styles ----------------------------- */
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -73,6 +78,7 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
+
   ...(open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
@@ -100,15 +106,19 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
+/* ----------------------------- MAIN EXPORT ----------------------------- */
+
 export default function Admin() {
   const theme = useTheme();
   const [open, setOpen] = useState(true);
+
   const [itemsOpen, setItemsOpen] = useState(false);
   const [orderOpen, setOrderOpen] = useState(false);
   const [websiteOpen, setWebsiteOpen] = useState(false);
   const [blogOpen, setBlogOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false); // FIXED
+  const [userOpen, setUserOpen] = useState(false); // NEW FIXED
 
-  const [stateOpen, setStateOpen] = useState(false); // ✅ New state for Manage State
   const location = useLocation();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -121,6 +131,8 @@ export default function Admin() {
 
   const isActiveLink = (path) => location.pathname === path;
 
+  /* ----------------------------- Submenus ----------------------------- */
+
   const itemsSubmenu = [
     { to: "/category_list", label: "Category" },
     { to: "/item_department_list", label: "Department" },
@@ -132,7 +144,7 @@ export default function Admin() {
     { to: "/item_certificate_list", label: "Certificate Type" },
     { to: "/item_lab_list", label: "Lab" },
     { to: "/item_list", label: "Items" },
-    { to: "/discount", label: "Discount COUPON " },
+    { to: "/discount", label: "Discount COUPON" },
   ];
 
   const orderSubmenu = [
@@ -145,96 +157,101 @@ export default function Admin() {
     { to: "/pagelist", label: "Page List" },
     { to: "/manage_testimonials", label: "Testimonials" },
     { to: "/manage_faqs", label: "FAQs" },
-    
-  ];
-
-  // ✅ Proper State Management Submenu
-  const stateSubmenu = [
-    { to: "/manage_countries", label: "Countries", icon: <PublicIcon fontSize="small" /> },
-    { to: "/manage_states", label: "States", icon: <FlagIcon fontSize="small" /> },
-    { to: "/manage_cities", label: "Cities", icon: <LocationIcon fontSize="small" /> },
-    { to: "/manage_areas", label: "Areas/Localities", icon: <LocationIcon fontSize="small" /> },
-    { to: "/manage_pincodes", label: "Pincodes", icon: <LocationIcon fontSize="small" /> },
-    { to: "/service_availability", label: "Service Availability", icon: <LocationIcon fontSize="small" /> },
   ];
 
   const blogSubmenu = [
-  { to: "/manage_blogs", label: "All Blogs" },
-  { to: "/manage_blogs", label: "Add Blog" },
-  { to: "/blog_categories", label: "Blog Categories" },
-  { to: "/blog_tags", label: "Tags" },
-];
+    { to: "/manage_blogs", label: "All Blogs" },
+    { to: "/manage_blogs", label: "Add Blog" },
+    { to: "/blog_categories", label: "Blog Categories" },
+    { to: "/blog_tags", label: "Tags" },
+  ];
 
+  const locationSubmenu = [
+    { to: "/manage_countries", label: "Countries", icon: <PublicIcon /> },
+    { to: "/manage_states", label: "States", icon: <FlagIcon /> },
+    { to: "/manage_cities", label: "Cities", icon: <LocationIcon /> },
+    { to: "/manage_areas", label: "Areas/Localities", icon: <LocationIcon /> },
+    { to: "/manage_pincodes", label: "Pincodes", icon: <LocationIcon /> },
+    { to: "/service_availability", label: "Service Availability", icon: <LocationIcon /> },
+  ];
 
- const userListSubmenu = [
-  { to: "/manage_users", label: "All Users", icon: <PublicIcon fontSize="small" /> },
-  { to: "/add_user", label: "Add User", icon: <PublicIcon fontSize="small" /> },
-];
+  const userSubmenu = [
+    { to: "/manage_users", label: "All Users", icon: <PeopleIcon /> },
+    { to: "/add_user", label: "Add User", icon: <PeopleIcon /> },
+  ];
 
+  /* ----------------------------- RENDER ----------------------------- */
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
+
+      {/* ----------------------------- Top AppBar ----------------------------- */}
       <AppBar position="fixed" open={open} sx={{ bgcolor: "#8FCFD2", color: "black" }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
               color="inherit"
-              aria-label="open drawer"
               onClick={() => setOpen(true)}
-              edge="start"
               sx={{ marginRight: 5, ...(open && { display: "none" }) }}
             >
               <MenuIcon />
             </IconButton>
-            <Box>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>test</Typography>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}></Typography>
-            </Box>
+
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              test
+            </Typography>
           </Box>
+
           <Profile setIsAuthenticated={setIsAuthenticated} />
         </Toolbar>
       </AppBar>
 
+      {/* ----------------------------- Sidebar Drawer ----------------------------- */}
       <Drawer variant="permanent" open={open}>
         <DrawerHeader sx={{ bgcolor: "#8FCFD2" }}>
           <Typography variant="h5" sx={{ fontWeight: "bold", flex: 1, ml: 4 }}>
-           Wello Healthcare
+            Wello Healthcare
           </Typography>
+
           <IconButton onClick={() => setOpen(false)}>
             {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </DrawerHeader>
+
         <Divider />
+
         <List sx={{ bgcolor: "#8FCFD2", height: "100%" }}>
-          {/* Dashboard */}
+
+          {/* ----------------------------- Dashboard ----------------------------- */}
           <Link to="/admin" style={{ textDecoration: "none", color: "inherit" }}>
             <ListItem disablePadding>
               <ListItemButton sx={{ color: isActiveLink("/admin") ? "#1E9C9D" : "black" }}>
                 <ListItemIcon sx={{ color: "inherit" }}>
                   <DashboardIcon />
                 </ListItemIcon>
-                <ListItemText primary="Dashboard" primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }} />
+                <ListItemText primary="Dashboard" />
               </ListItemButton>
             </ListItem>
           </Link>
 
-          {/* Items */}
+          {/* ----------------------------- Items ----------------------------- */}
           <ListItem disablePadding onClick={() => setItemsOpen(!itemsOpen)}>
             <ListItemButton>
               <ListItemIcon><CategoryIcon /></ListItemIcon>
-              <ListItemText primary="Items" primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }} />
+              <ListItemText primary="Items" />
               {itemsOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
           </ListItem>
-          <Collapse in={itemsOpen} timeout="auto" unmountOnExit>
+
+          <Collapse in={itemsOpen}>
             <List component="div" disablePadding>
-              {itemsSubmenu.map(({ to, label }) => (
-                <Link key={label} to={to} style={{ textDecoration: "none", color: "inherit" }}>
+              {itemsSubmenu.map((i) => (
+                <Link key={i.label} to={i.to} style={{ textDecoration: "none", color: "inherit" }}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, py: 0.5, color: isActiveLink(to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon sx={{ minWidth: 32 }}><ArrowRightIcon fontSize="small" /></ListItemIcon>
-                      <ListItemText primary={label} primaryTypographyProps={{ fontSize: "13px" }} />
+                    <ListItemButton sx={{ pl: 4, color: isActiveLink(i.to) ? "#1E9C9D" : "black" }}>
+                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
+                      <ListItemText primary={i.label} />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -242,22 +259,23 @@ export default function Admin() {
             </List>
           </Collapse>
 
-          {/* Orders */}
+          {/* ----------------------------- Orders ----------------------------- */}
           <ListItem disablePadding onClick={() => setOrderOpen(!orderOpen)}>
             <ListItemButton>
               <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
-              <ListItemText primary="Manage Orders" primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }} />
+              <ListItemText primary="Manage Orders" />
               {orderOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
           </ListItem>
-          <Collapse in={orderOpen} timeout="auto" unmountOnExit>
+
+          <Collapse in={orderOpen}>
             <List component="div" disablePadding>
-              {orderSubmenu.map(({ to, label }) => (
-                <Link key={label} to={to} style={{ textDecoration: "none", color: "inherit" }}>
+              {orderSubmenu.map((i) => (
+                <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, py: 0.5, color: isActiveLink(to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon sx={{ minWidth: 32 }}><ArrowRightIcon fontSize="small" /></ListItemIcon>
-                      <ListItemText primary={label} primaryTypographyProps={{ fontSize: "13px" }} />
+                    <ListItemButton sx={{ pl: 4, color: isActiveLink(i.to) ? "#1E9C9D" : "black" }}>
+                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
+                      <ListItemText primary={i.label} />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -265,22 +283,23 @@ export default function Admin() {
             </List>
           </Collapse>
 
-          {/* Website Management */}
+          {/* ----------------------------- Website ----------------------------- */}
           <ListItem disablePadding onClick={() => setWebsiteOpen(!websiteOpen)}>
             <ListItemButton>
               <ListItemIcon><WebIcon /></ListItemIcon>
-              <ListItemText primary="Manage Website" primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }} />
+              <ListItemText primary="Manage Website" />
               {websiteOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
           </ListItem>
-          <Collapse in={websiteOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {websiteSubmenu.map(({ to, label }) => (
-                <Link key={label} to={to} style={{ textDecoration: "none", color: "inherit" }}>
+
+          <Collapse in={websiteOpen}>
+            <List disablePadding>
+              {websiteSubmenu.map((i) => (
+                <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, py: 0.5, color: isActiveLink(to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon sx={{ minWidth: 32 }}><ArrowRightIcon fontSize="small" /></ListItemIcon>
-                      <ListItemText primary={label} primaryTypographyProps={{ fontSize: "13px" }} />
+                    <ListItemButton sx={{ pl: 4 }}>
+                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
+                      <ListItemText primary={i.label} />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -288,105 +307,87 @@ export default function Admin() {
             </List>
           </Collapse>
 
+          {/* ----------------------------- Blog ----------------------------- */}
           <ListItem disablePadding onClick={() => setBlogOpen(!blogOpen)}>
-  <ListItemButton>
-    <ListItemIcon><WebIcon /></ListItemIcon> {/* You can replace WebIcon with a Blog icon if you want */}
-    <ListItemText
-      primary="Manage Blog"
-      primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }}
-    />
-    {blogOpen ? <ExpandLess /> : <ExpandMore />}
-  </ListItemButton>
-</ListItem>
-<Collapse in={blogOpen} timeout="auto" unmountOnExit>
-  <List component="div" disablePadding>
-    {blogSubmenu.map(({ to, label }) => (
-      <Link key={label} to={to} style={{ textDecoration: "none", color: "inherit" }}>
-        <ListItem disablePadding>
-          <ListItemButton sx={{ pl: 4, py: 0.5, color: isActiveLink(to) ? "#1E9C9D" : "black" }}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <ArrowRightIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={label}
-              primaryTypographyProps={{ fontSize: "13px", fontWeight: isActiveLink(to) ? 600 : 400 }}
-            />
-          </ListItemButton>
-        </ListItem>
-      </Link>
-    ))}
-  </List>
-</Collapse>
+            <ListItemButton>
+              <ListItemIcon><WebIcon /></ListItemIcon>
+              <ListItemText primary="Manage Blog" />
+              {blogOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+          </ListItem>
 
-          {/* ✅ Manage State - Proper Implementation */}
-          <ListItem disablePadding onClick={() => setStateOpen(!stateOpen)}>
-            <ListItemButton>
-              <ListItemIcon><LocationIcon /></ListItemIcon>
-              <ListItemText primary="Manage Locations" primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }} />
-              {stateOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-          </ListItem>
-          <Collapse in={stateOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {stateSubmenu.map(({ to, label, icon }) => (
-                <Link key={label} to={to} style={{ textDecoration: "none", color: "inherit" }}>
+          <Collapse in={blogOpen}>
+            <List disablePadding>
+              {blogSubmenu.map((i) => (
+                <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, py: 0.5, color: isActiveLink(to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={label} 
-                        primaryTypographyProps={{ 
-                          fontSize: "13px",
-                          fontWeight: isActiveLink(to) ? 600 : 400
-                        }} 
-                      />
+                    <ListItemButton sx={{ pl: 4 }}>
+                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
+                      <ListItemText primary={i.label} />
                     </ListItemButton>
                   </ListItem>
                 </Link>
               ))}
             </List>
           </Collapse>
-          <ListItem disablePadding onClick={() => setStateOpen(!stateOpen)}>
+
+          {/* ----------------------------- Locations ----------------------------- */}
+          <ListItem disablePadding onClick={() => setLocationOpen(!locationOpen)}>
             <ListItemButton>
               <ListItemIcon><LocationIcon /></ListItemIcon>
-              <ListItemText primary="Manage Users" primaryTypographyProps={{ fontSize: "13px", fontWeight: 500 }} />
-              {stateOpen ? <ExpandLess /> : <ExpandMore />}
+              <ListItemText primary="Manage Locations" />
+              {locationOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
           </ListItem>
-          <Collapse in={stateOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {stateSubmenu.map(({ to, label, icon }) => (
-                <Link key={label} to={to} style={{ textDecoration: "none", color: "inherit" }}>
+
+          <Collapse in={locationOpen}>
+            <List disablePadding>
+              {locationSubmenu.map((i) => (
+                <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, py: 0.5, color: isActiveLink(to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={label} 
-                        primaryTypographyProps={{ 
-                          fontSize: "13px",
-                          fontWeight: isActiveLink(to) ? 600 : 400
-                        }} 
-                      />
+                    <ListItemButton sx={{ pl: 4 }}>
+                      <ListItemIcon>{i.icon}</ListItemIcon>
+                      <ListItemText primary={i.label} />
                     </ListItemButton>
                   </ListItem>
                 </Link>
               ))}
             </List>
           </Collapse>
-          
+
+          {/* ----------------------------- Users ----------------------------- */}
+          <ListItem disablePadding onClick={() => setUserOpen(!userOpen)}>
+            <ListItemButton>
+              <ListItemIcon><PeopleIcon /></ListItemIcon>
+              <ListItemText primary="Users" />
+              {userOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+          </ListItem>
+
+          <Collapse in={userOpen}>
+            <List disablePadding>
+              {userSubmenu.map((i) => (
+                <Link key={i.label} to={i.to}>
+                  <ListItem disablePadding>
+                    <ListItemButton sx={{ pl: 4 }}>
+                      <ListItemIcon>{i.icon}</ListItemIcon>
+                      <ListItemText primary={i.label} />
+                    </ListItemButton>
+                  </ListItem>
+                </Link>
+              ))}
+            </List>
+          </Collapse>
+
         </List>
-
-        
       </Drawer>
 
+      {/* ----------------------------- Page Content ----------------------------- */}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
         <Outlet />
       </Box>
+
     </Box>
   );
 }

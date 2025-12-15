@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:3000/v1/api';
+const BASE_URL = 'https://razobytehealthcare-website-backend-code.onrender.com/v1/api';
 
 const useCertificates = () => {
   const [certificates, setCertificates] = useState([]);

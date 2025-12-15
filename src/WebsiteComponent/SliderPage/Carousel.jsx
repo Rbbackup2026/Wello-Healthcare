@@ -71,7 +71,7 @@ const Carousel = () => {
 
   // Fetch active banners from backend
   useEffect(() => {
-    fetch("http://localhost:3000/v1/api/getbanner")
+    fetch("https://razobytehealthcare-website-backend-code.onrender.com/v1/api/getbanner")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -108,7 +108,7 @@ const Carousel = () => {
         {slides.map((slide) => (
           <div key={slide._id} className="min-w-full h-[300px] relative">
             <img
-              src={slide.image ? `http://localhost:3000${slide.image}` : defaultImage}
+              src={slide.image ? `https://razobytehealthcare-website-backend-code.onrender.com${slide.image}` : defaultImage}
               alt={slide.title}
               className="w-full h-full object-cover"
             />

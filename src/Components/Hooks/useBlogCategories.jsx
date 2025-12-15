@@ -6,7 +6,7 @@ const useBlogCategories = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = "http://localhost:3000/v1/api";
+  const API_BASE_URL = "https://razobytehealthcare-website-backend-code.onrender.com/v1/api";
 
   // Get auth token
   const getAuthToken = () => {

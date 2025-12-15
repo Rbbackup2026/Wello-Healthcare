@@ -10,7 +10,7 @@ const BlogSection = () => {
 
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/v1/api/blogget-active");
+      const res = await axios.get("https://razobytehealthcare-website-backend-code.onrender.com/v1/api/blogget-active");
 
       setBlogs(res.data);
     } catch (err) {
