@@ -46,6 +46,12 @@ import IteamDetail from "../../WebsiteComponent/Homecomponents/ItemDetail";
 import CartPage from "../../WebsiteComponent/Homecomponents/CartPage";
 import CouponTable from "../ComponentPage/CouponTable";
 import { ToastContainer } from "react-toastify";
+import UserList from "../ComponentPage/UsersPage/UserList";
+import Newsletter from "../ComponentPage/UsersPage/Newsletter";
+import ContactInquiry from "../ComponentPage/UsersPage/ContactInquiry";
+import GetInTouchInquiry from "../ComponentPage/UsersPage/GetInTouchInquiry";
+import CollectionAppointment from "../ComponentPage/UsersPage/CollectionAppointment";
+import TestBookingEnquiry from "../ComponentPage/UsersPage/TestBookingEnquiry";
 
 
 function MainRoute() {
@@ -104,6 +110,12 @@ function MainRoute() {
         <Route path="/blog_categories" element={<BlogCategory/>} />
         <Route path="/blog_tags" element={<BlogTags/>} />
         <Route path="/discount" element={<CouponTable/>} />
+        <Route path="/customer_list" element={<UserList/>} />
+        <Route path="/newsletter_list" element={<Newsletter/>} />
+        <Route path="/help_list" element={<ContactInquiry/>} />
+        <Route path="/get_tuch_inq_list" element={<GetInTouchInquiry/>} />
+        <Route path="/collection_appointment_list" element={<CollectionAppointment/>} />
+        <Route path="/test_booking_enquiry_list" element={<TestBookingEnquiry/>} />
 
 
         {/* Cart Routes */}

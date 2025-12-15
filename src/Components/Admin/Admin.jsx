@@ -24,7 +24,7 @@ import {
   Dashboard as DashboardIcon,
   ExpandLess,
   ExpandMore,
-  ArrowRight as ArrowRightIcon,
+  
   ShoppingCart as ShoppingCartIcon,
   Category as CategoryIcon,
   Web as WebIcon,
@@ -167,17 +167,21 @@ export default function Admin() {
   ];
 
   const locationSubmenu = [
-    { to: "/manage_countries", label: "Countries", icon: <PublicIcon /> },
-    { to: "/manage_states", label: "States", icon: <FlagIcon /> },
-    { to: "/manage_cities", label: "Cities", icon: <LocationIcon /> },
-    { to: "/manage_areas", label: "Areas/Localities", icon: <LocationIcon /> },
-    { to: "/manage_pincodes", label: "Pincodes", icon: <LocationIcon /> },
-    { to: "/service_availability", label: "Service Availability", icon: <LocationIcon /> },
+    { to: "/manage_countries", label: "Countries"},
+    { to: "/manage_states", label: "States"},
+    { to: "/manage_cities", label: "Cities" },
+    { to: "/manage_areas", label: "Areas/Localities" },
+    { to: "/manage_pincodes", label: "Pincodes" },
+    { to: "/service_availability", label: "Service Availability" },
   ];
 
   const userSubmenu = [
-    { to: "/manage_users", label: "All Users", icon: <PeopleIcon /> },
-    { to: "/add_user", label: "Add User", icon: <PeopleIcon /> },
+    { to: "/customer_list", label: "User List "  },
+    { to: "/newsletter_list", label: "Newsletter List"},
+    { to: "/help_list", label: "Contact Inquiry" },
+    { to: "/get_tuch_inq_list", label: "Get In Touch Inquiry"},
+    { to: "/collection_appointment_list", label: "Collection Appointment" },
+    { to: "/test_booking_enquiry_list", label: "Test Booking Enquiry" },
   ];
 
   /* ----------------------------- RENDER ----------------------------- */
@@ -198,7 +202,7 @@ export default function Admin() {
               <MenuIcon />
             </IconButton>
 
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold", fontSize: '1.1rem' }}>
               test
             </Typography>
           </Box>
@@ -210,7 +214,12 @@ export default function Admin() {
       {/* ----------------------------- Sidebar Drawer ----------------------------- */}
       <Drawer variant="permanent" open={open}>
         <DrawerHeader sx={{ bgcolor: "#8FCFD2" }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold", flex: 1, ml: 4 }}>
+          <Typography variant="h5" sx={{ 
+            fontWeight: "bold", 
+            flex: 1, 
+            ml: 4,
+            fontSize: '1.1rem' // Smaller font size
+          }}>
             Wello Healthcare
           </Typography>
 
@@ -226,21 +235,41 @@ export default function Admin() {
           {/* ----------------------------- Dashboard ----------------------------- */}
           <Link to="/admin" style={{ textDecoration: "none", color: "inherit" }}>
             <ListItem disablePadding>
-              <ListItemButton sx={{ color: isActiveLink("/admin") ? "#1E9C9D" : "black" }}>
-                <ListItemIcon sx={{ color: "inherit" }}>
-                  <DashboardIcon />
+              <ListItemButton sx={{ 
+                color: isActiveLink("/admin") ? "#1E9C9D" : "black",
+                py: 0.8 // Reduced padding
+              }}>
+                <ListItemIcon sx={{ 
+                  color: "inherit",
+                  minWidth: 40 // Smaller icon container
+                }}>
+                  <DashboardIcon sx={{ fontSize: '1.2rem' }} /> {/* Smaller icons */}
                 </ListItemIcon>
-                <ListItemText primary="Dashboard" />
+                <ListItemText 
+                  primary="Dashboard" 
+                  primaryTypographyProps={{ 
+                    fontSize: '0.85rem', // Smaller text
+                    fontWeight: 500 
+                  }}
+                />
               </ListItemButton>
             </ListItem>
           </Link>
 
           {/* ----------------------------- Items ----------------------------- */}
           <ListItem disablePadding onClick={() => setItemsOpen(!itemsOpen)}>
-            <ListItemButton>
-              <ListItemIcon><CategoryIcon /></ListItemIcon>
-              <ListItemText primary="Items" />
-              {itemsOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemButton sx={{ py: 0.8 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <CategoryIcon sx={{ fontSize: '1.2rem' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Items" 
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500 
+                }}
+              />
+              {itemsOpen ? <ExpandLess sx={{ fontSize: '1.1rem' }} /> : <ExpandMore sx={{ fontSize: '1.1rem' }} />}
             </ListItemButton>
           </ListItem>
 
@@ -249,9 +278,18 @@ export default function Admin() {
               {itemsSubmenu.map((i) => (
                 <Link key={i.label} to={i.to} style={{ textDecoration: "none", color: "inherit" }}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, color: isActiveLink(i.to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
-                      <ListItemText primary={i.label} />
+                    <ListItemButton sx={{ 
+                      pl: 4, 
+                      color: isActiveLink(i.to) ? "#1E9C9D" : "black",
+                      py: 0.6 // Even smaller padding for subitems
+                    }}>
+                      <ListItemText 
+                        primary={i.label} 
+                        primaryTypographyProps={{ 
+                          fontSize: '0.8rem', // Smaller submenu text
+                          fontWeight: 400 
+                        }}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -261,10 +299,18 @@ export default function Admin() {
 
           {/* ----------------------------- Orders ----------------------------- */}
           <ListItem disablePadding onClick={() => setOrderOpen(!orderOpen)}>
-            <ListItemButton>
-              <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
-              <ListItemText primary="Manage Orders" />
-              {orderOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemButton sx={{ py: 0.8 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <ShoppingCartIcon sx={{ fontSize: '1.2rem' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Manage Orders" 
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500 
+                }}
+              />
+              {orderOpen ? <ExpandLess sx={{ fontSize: '1.1rem' }} /> : <ExpandMore sx={{ fontSize: '1.1rem' }} />}
             </ListItemButton>
           </ListItem>
 
@@ -273,9 +319,18 @@ export default function Admin() {
               {orderSubmenu.map((i) => (
                 <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4, color: isActiveLink(i.to) ? "#1E9C9D" : "black" }}>
-                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
-                      <ListItemText primary={i.label} />
+                    <ListItemButton sx={{ 
+                      pl: 4, 
+                      color: isActiveLink(i.to) ? "#1E9C9D" : "black",
+                      py: 0.6
+                    }}>
+                      <ListItemText 
+                        primary={i.label} 
+                        primaryTypographyProps={{ 
+                          fontSize: '0.8rem',
+                          fontWeight: 400 
+                        }}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -285,10 +340,18 @@ export default function Admin() {
 
           {/* ----------------------------- Website ----------------------------- */}
           <ListItem disablePadding onClick={() => setWebsiteOpen(!websiteOpen)}>
-            <ListItemButton>
-              <ListItemIcon><WebIcon /></ListItemIcon>
-              <ListItemText primary="Manage Website" />
-              {websiteOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemButton sx={{ py: 0.8 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <WebIcon sx={{ fontSize: '1.2rem' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Manage Website" 
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500 
+                }}
+              />
+              {websiteOpen ? <ExpandLess sx={{ fontSize: '1.1rem' }} /> : <ExpandMore sx={{ fontSize: '1.1rem' }} />}
             </ListItemButton>
           </ListItem>
 
@@ -297,9 +360,14 @@ export default function Admin() {
               {websiteSubmenu.map((i) => (
                 <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4 }}>
-                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
-                      <ListItemText primary={i.label} />
+                    <ListItemButton sx={{ pl: 4, py: 0.6 }}>
+                      <ListItemText 
+                        primary={i.label} 
+                        primaryTypographyProps={{ 
+                          fontSize: '0.8rem',
+                          fontWeight: 400 
+                        }}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -309,10 +377,18 @@ export default function Admin() {
 
           {/* ----------------------------- Blog ----------------------------- */}
           <ListItem disablePadding onClick={() => setBlogOpen(!blogOpen)}>
-            <ListItemButton>
-              <ListItemIcon><WebIcon /></ListItemIcon>
-              <ListItemText primary="Manage Blog" />
-              {blogOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemButton sx={{ py: 0.8 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <WebIcon sx={{ fontSize: '1.2rem' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Manage Blog" 
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500 
+                }}
+              />
+              {blogOpen ? <ExpandLess sx={{ fontSize: '1.1rem' }} /> : <ExpandMore sx={{ fontSize: '1.1rem' }} />}
             </ListItemButton>
           </ListItem>
 
@@ -321,9 +397,14 @@ export default function Admin() {
               {blogSubmenu.map((i) => (
                 <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4 }}>
-                      <ListItemIcon><ArrowRightIcon /></ListItemIcon>
-                      <ListItemText primary={i.label} />
+                    <ListItemButton sx={{ pl: 4, py: 0.6 }}>
+                      <ListItemText 
+                        primary={i.label} 
+                        primaryTypographyProps={{ 
+                          fontSize: '0.8rem',
+                          fontWeight: 400 
+                        }}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -333,10 +414,18 @@ export default function Admin() {
 
           {/* ----------------------------- Locations ----------------------------- */}
           <ListItem disablePadding onClick={() => setLocationOpen(!locationOpen)}>
-            <ListItemButton>
-              <ListItemIcon><LocationIcon /></ListItemIcon>
-              <ListItemText primary="Manage Locations" />
-              {locationOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemButton sx={{ py: 0.8 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <LocationIcon sx={{ fontSize: '1.2rem' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Manage Locations" 
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500 
+                }}
+              />
+              {locationOpen ? <ExpandLess sx={{ fontSize: '1.1rem' }} /> : <ExpandMore sx={{ fontSize: '1.1rem' }} />}
             </ListItemButton>
           </ListItem>
 
@@ -345,9 +434,14 @@ export default function Admin() {
               {locationSubmenu.map((i) => (
                 <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4 }}>
-                      <ListItemIcon>{i.icon}</ListItemIcon>
-                      <ListItemText primary={i.label} />
+                    <ListItemButton sx={{ pl: 4, py: 0.6 }}>
+                      <ListItemText 
+                        primary={i.label} 
+                        primaryTypographyProps={{ 
+                          fontSize: '0.8rem',
+                          fontWeight: 400 
+                        }}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Link>
@@ -357,10 +451,18 @@ export default function Admin() {
 
           {/* ----------------------------- Users ----------------------------- */}
           <ListItem disablePadding onClick={() => setUserOpen(!userOpen)}>
-            <ListItemButton>
-              <ListItemIcon><PeopleIcon /></ListItemIcon>
-              <ListItemText primary="Users" />
-              {userOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemButton sx={{ py: 0.8 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <PeopleIcon sx={{ fontSize: '1.2rem' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Users" 
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500 
+                }}
+              />
+              {userOpen ? <ExpandLess sx={{ fontSize: '1.1rem' }} /> : <ExpandMore sx={{ fontSize: '1.1rem' }} />}
             </ListItemButton>
           </ListItem>
 
@@ -369,9 +471,14 @@ export default function Admin() {
               {userSubmenu.map((i) => (
                 <Link key={i.label} to={i.to}>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ pl: 4 }}>
-                      <ListItemIcon>{i.icon}</ListItemIcon>
-                      <ListItemText primary={i.label} />
+                    <ListItemButton sx={{ pl: 4, py: 0.6 }}>
+                      <ListItemText 
+                        primary={i.label} 
+                        primaryTypographyProps={{ 
+                          fontSize: '0.8rem',
+                          fontWeight: 400 
+                        }}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Link>
