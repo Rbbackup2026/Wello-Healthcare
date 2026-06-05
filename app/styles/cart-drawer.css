@@ -1,0 +1,1051 @@
+.wello-cart-panel {
+  position: fixed;
+  top: 162px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.wello-sticky-header .wello-nav-shell {
+  position: relative !important;
+  z-index: 30;
+}
+
+.wello-sticky-header .wello-menu,
+.wello-sticky-header .wello-flyout {
+  z-index: 40;
+}
+
+.wello-cart-panel.is-open {
+  pointer-events: auto;
+}
+
+.wello-cart-panel.has-person-modal {
+  top: 0;
+  z-index: 1000;
+}
+
+.wello-cart-panel.is-page.has-person-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  min-height: 100vh;
+}
+
+.wello-cart-panel.is-page {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  min-height: calc(100vh - 162px);
+  pointer-events: auto;
+}
+
+.wello-cart-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0);
+  cursor: pointer;
+}
+
+.wello-cart-panel.is-open .wello-cart-backdrop {
+  background: transparent;
+}
+
+.wello-cart-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  background:
+    linear-gradient(90deg, #a85d5d 0 72px, transparent 72px),
+    radial-gradient(circle at 30% -20%, rgba(14, 165, 233, 0.12), transparent 30%),
+    #ffffff;
+  transform: translateX(110%);
+  transition: transform 0.35s ease;
+}
+
+.wello-cart-panel.is-open .wello-cart-content {
+  transform: translateX(0);
+}
+
+.wello-cart-panel.is-page .wello-cart-content {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: calc(100vh - 162px);
+  overflow: visible;
+  background:
+    radial-gradient(circle at 30% -20%, rgba(14, 165, 233, 0.12), transparent 30%),
+    #ffffff;
+  transform: none;
+  transition: none;
+}
+
+.wello-cart-panel.is-page .wello-cart-scroll {
+  padding-top: 44px;
+}
+
+.wello-cart-panel.is-page .wello-cart-grid {
+  width: min(1230px, calc(100% - 48px));
+}
+
+.wello-cart-head {
+  width: min(1040px, calc(100% - 120px));
+  min-height: auto;
+  margin: 0 auto;
+  padding: 24px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.wello-cart-close {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d5eeee;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #00857f;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.wello-cart-scroll {
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 0 0 48px;
+  overflow: visible;
+  background: transparent;
+}
+
+.wello-cart-empty {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  text-align: center;
+  color: #64748b;
+}
+
+.wello-cart-empty-icon {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ccfbf1;
+  color: #0d9488;
+  font-size: 28px;
+}
+
+.wello-cart-empty h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.wello-cart-empty p {
+  margin: 0;
+  max-width: 260px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.wello-cart-grid {
+  position: relative;
+  width: min(1230px, calc(100% - 120px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 730px) 386px;
+  gap: 114px;
+  align-items: start;
+}
+
+.wello-cart-grid::before {
+  content: "";
+  position: absolute;
+  top: 39px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #d9d9d9;
+}
+
+.wello-cart-main-area {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  width: 730px;
+  max-width: 100%;
+}
+
+.wello-cart-section-title {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.wello-cart-section-title h3 {
+  margin: 0;
+  padding-bottom: 12px;
+  color: #404040;
+  font-family: "Manrope", sans-serif;
+  font-size: 32px;
+  line-height: 100%;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.wello-cart-add-test {
+  min-width: 116px;
+  min-height: 35px;
+  margin-bottom: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #008a86;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.wello-cart-list {
+  display: grid;
+  gap: 14px;
+}
+
+.wello-cart-item {
+  min-height: 172px;
+  padding: 22px 28px 18px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 13px 28px rgba(0, 0, 0, 0.18);
+}
+
+.wello-cart-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.wello-cart-item h3 {
+  margin: 0;
+  color: #333333;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.wello-cart-pill {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #00b9b5;
+  border-radius: 999px;
+  padding: 2px 10px;
+  color: #008a86;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.wello-cart-price-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.wello-cart-price-row strong {
+  color: #07BEB8;
+  font-family: "Manrope", sans-serif;
+  font-size: 32px;
+  line-height: 30px;
+  font-weight: 800;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.wello-cart-remove {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #008a86;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.wello-cart-remove img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.wello-cart-item-actions {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wello-cart-patient-btn {
+  min-height: 38px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: #008a86;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wello-cart-people-list {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wello-cart-people-list span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid #bdecea;
+  border-radius: 999px;
+  background: #efffff;
+  color: #008a86;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.wello-cart-qty {
+  width: max-content;
+  height: 30px;
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid #d7eeee;
+  border-radius: 6px;
+  background: #f7ffff;
+}
+
+.wello-cart-qty span,
+.wello-cart-qty strong {
+  min-width: 32px;
+  color: #008a86;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.wello-cart-qty button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #008a86;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.wello-cart-faq {
+  margin: 18px 0 0;
+  color: #777777;
+  font-size: 16px;
+}
+
+.wello-cart-faq a {
+  color: #00aaa6;
+}
+
+.wello-cart-side-area {
+  position: relative;
+  z-index: 1;
+  width: 386px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.wello-cart-side-area .wello-cart-add-test {
+  align-self: flex-end;
+}
+
+.wello-cart-summary-card {
+  width: 386px;
+  min-height: 365px;
+  margin-top: 0;
+  padding: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.wello-cart-service {
+  min-height: 99px;
+  padding: 18px 16px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 14px;
+  gap: 12px;
+  align-items: center;
+  
+  border-radius: 7px;
+  background: #efffff;
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.14);
+}
+
+.wello-cart-service-icon {
+  width: 66px;
+  height: 49px;
+  object-fit: contain;
+}
+
+.wello-cart-service svg {
+  color: #008a86;
+  font-size: 44px;
+}
+
+.wello-cart-service h4 {
+  margin: 0 0 4px;
+  color: #222222;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.wello-cart-service p {
+  margin: 0;
+  color: #333333;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.wello-cart-service-check {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #047F7B;
+  border-radius: 1px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.wello-cart-service-check.is-checked {
+  position: relative;
+  background: #008a86;
+}
+
+.wello-cart-service-check.is-checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 4px;
+  height: 7px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.wello-cart-booking-box {
+  width: 358px;
+  min-height: 152px;
+  max-width: 100%;
+  margin: 14px auto 0;
+  padding: 16px 18px 15px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.wello-cart-booking-box p {
+  margin: 0 0 12px;
+  color: #3D3D3D;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: "Manrope", sans-serif;
+}
+
+.wello-cart-total {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.wello-cart-total span {
+  color: #333333;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "Manrope", sans-serif;
+}
+
+.wello-cart-total strong {
+  color: #00a9a5;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.wello-cart-checkout {
+  min-height: 34px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #48c7c2 0%, #238a86 100%);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "Manrope", sans-serif;
+}
+
+.wello-cart-note {
+  width: 354px;
+  min-height: 19px;
+  max-width: 100%;
+  margin: 14px auto 14px;
+  color: #8a8a8a;
+  font-family: "Manrope", sans-serif;
+  font-size: 14px;
+  line-height: 100%;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.wello-cart-category-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.wello-cart-category-actions a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 6px;
+  background: #008a86;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.wello-cart-mobile-footer {
+  display: none;
+}
+
+.wello-cart-modal-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 86px 24px 24px;
+}
+
+.wello-cart-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.58);
+  cursor: pointer;
+}
+
+.wello-cart-person-modal {
+  position: relative;
+  z-index: 1;
+  width: min(734px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+}
+
+.wello-cart-person-head {
+  min-height: 64px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #e2e2e2;
+}
+
+.wello-cart-person-head h3 {
+  margin: 0;
+  color: #0d155d;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+.wello-cart-person-head button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #cfcfcf;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.wello-cart-person-fields {
+  padding: 42px 30px 0;
+  display: grid;
+  grid-template-columns: 150px repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+.wello-cart-person-fields label,
+.wello-cart-person-gender {
+  display: grid;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.wello-cart-person-fields input,
+.wello-cart-person-fields select,
+.wello-cart-person-fields textarea {
+  width: 100%;
+  min-height: 49px;
+  border: 1px solid #d7d7d7;
+  border-radius: 4px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #222222;
+  font-size: 14px;
+  outline: none;
+}
+
+.wello-cart-person-fields textarea {
+  min-height: 50px;
+  padding-top: 10px;
+  resize: vertical;
+}
+
+.wello-cart-person-fields input:focus,
+.wello-cart-person-fields select:focus,
+.wello-cart-person-fields textarea:focus {
+  border-color: #008a86;
+  box-shadow: 0 0 0 3px rgba(0, 138, 134, 0.12);
+}
+
+.wello-cart-field-prefix select {
+  color: #18304a;
+}
+
+.wello-cart-person-gender {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  align-content: start;
+  grid-template-columns: repeat(2, max-content);
+  column-gap: 28px;
+}
+
+.wello-cart-person-gender legend {
+  grid-column: 1 / -1;
+  margin: 0 0 6px;
+  padding: 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.wello-cart-person-gender label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #222222;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.wello-cart-person-gender input {
+  width: 20px;
+  min-height: auto;
+  height: 20px;
+  padding: 0;
+  accent-color: #1476b8;
+}
+
+.wello-cart-person-wide {
+  grid-column: 1 / -1;
+}
+
+.wello-cart-person-span-2 {
+  grid-column: span 2;
+}
+
+.wello-cart-person-actions {
+  padding: 36px 30px 24px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.wello-cart-person-actions button {
+  min-width: 118px;
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.wello-cart-person-cancel {
+  border: 1px solid #d5eeee;
+  background: #ffffff;
+  color: #00857f;
+}
+
+.wello-cart-person-save {
+  border: 0;
+  background: #1f7db9;
+  color: #ffffff;
+}
+
+.wello-cart-person-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .wello-cart-panel {
+    top: 100px;
+  }
+
+  .wello-cart-panel.is-page {
+    min-height: calc(100vh - 100px);
+  }
+
+  .wello-cart-content {
+    background: #ffffff;
+  }
+
+  .wello-cart-panel.is-page .wello-cart-content {
+    min-height: calc(100vh - 100px);
+  }
+
+  .wello-cart-panel.is-page .wello-cart-scroll {
+    padding-top: 24px;
+  }
+
+  .wello-cart-head,
+  .wello-cart-grid {
+    width: min(100% - 28px, 640px);
+  }
+
+  .wello-cart-head {
+    padding-top: 18px;
+  }
+
+  .wello-cart-section-title h3 {
+    font-size: 18px;
+  }
+
+  .wello-cart-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .wello-cart-main-area,
+  .wello-cart-side-area {
+    width: 100%;
+  }
+
+  .wello-cart-side-area {
+    order: -1;
+  }
+
+  .wello-cart-side-area .wello-cart-add-test {
+    align-self: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .wello-cart-summary-card {
+    margin-top: 0;
+    margin-bottom: 86px;
+  }
+
+  .wello-cart-item {
+    padding: 16px;
+  }
+
+  .wello-cart-item-top,
+  .wello-cart-item-actions {
+    flex-direction: column;
+  }
+
+  .wello-cart-item-actions {
+    margin-top: 22px;
+    align-items: stretch;
+  }
+
+  .wello-cart-patient-btn {
+    width: 100%;
+  }
+
+  .wello-cart-mobile-footer {
+    position: sticky;
+    bottom: 0;
+    display: block;
+    padding: 12px 14px 14px;
+    border-top: 1px solid #e6e6e6;
+    background: #ffffff;
+    box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .wello-cart-mobile-footer .wello-cart-total {
+    margin-bottom: 10px;
+  }
+
+  .wello-cart-summary-card .wello-cart-checkout,
+  .wello-cart-summary-card .wello-cart-booking-box .wello-cart-total {
+    display: none;
+  }
+
+  .wello-cart-modal-wrap {
+    align-items: flex-start;
+    padding: 72px 14px 14px;
+  }
+
+  .wello-cart-person-modal {
+    max-height: calc(100vh - 86px);
+  }
+
+  .wello-cart-person-fields {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .wello-cart-person-span-2 {
+    grid-column: auto;
+  }
+
+  .wello-cart-person-gender {
+    grid-template-columns: repeat(2, max-content);
+  }
+
+  .wello-cart-person-actions {
+    flex-direction: column-reverse;
+    padding: 0 18px 18px;
+  }
+
+  .wello-cart-person-actions button {
+    width: 100%;
+  }
+}
+/* ── Patient Select Mode ────────────────────────────────────────────── */
+
+.wello-patient-select {
+  display: flex;
+  flex-direction: column;
+}
+
+.wello-patient-select-topbar {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.wello-patient-add-new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 6px;
+  background: #1a5fa8;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.wello-patient-add-new-btn:hover {
+  background: #174e8c;
+}
+
+/* Patient list */
+.wello-patient-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px 20px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.wello-patient-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.wello-patient-list-item:hover {
+  border-color: #1a5fa8;
+  background: #f4f8ff;
+}
+
+.wello-patient-list-item.is-selected {
+  border-color: #1a5fa8;
+  background: #eef4ff;
+}
+
+.wello-patient-checkbox {
+  padding-top: 2px;
+  flex: 0 0 auto;
+}
+
+.wello-patient-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: auto;
+  border: 1.5px solid #1a5fa8;
+  border-radius: 3px;
+  accent-color: #1a5fa8;
+  cursor: pointer;
+}
+
+.wello-patient-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.wello-patient-name {
+  margin: 0 0 3px;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.wello-patient-meta {
+  margin: 0 0 3px;
+  color: #555555;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.wello-patient-address {
+  margin: 0;
+  color: #1a5fa8;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Back button row */
+.wello-patient-back-row {
+  padding: 14px 20px 0;
+}
+
+.wello-patient-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: #1a5fa8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.wello-patient-back-btn:hover {
+  text-decoration: underline;
+}
+
+/* Mobile adjustments */
+@media (max-width: 900px) {
+  .wello-patient-list {
+    max-height: 260px;
+    padding: 10px 14px 4px;
+  }
+
+  .wello-patient-select-topbar {
+    padding: 12px 14px;
+    justify-content: stretch;
+  }
+
+  .wello-patient-add-new-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .wello-patient-back-row {
+    padding: 12px 14px 0;
+  }
+}

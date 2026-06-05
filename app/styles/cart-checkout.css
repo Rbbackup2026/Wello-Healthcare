@@ -1,0 +1,492 @@
+.cart-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.cart-confetti-piece {
+  position: absolute;
+  top: -10px;
+  animation: cartConfettiFall 1.8s ease-in forwards;
+}
+
+.cart-coupon-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  background: rgba(15, 40, 60, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.cart-coupon-popup-card {
+  position: relative;
+  width: 100%;
+  max-width: 384px;
+  overflow: hidden;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0f9ff 100%);
+  box-shadow: 0 32px 80px rgba(16, 185, 129, 0.25);
+  text-align: center;
+  animation: cartPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.cart-coupon-popup-icon {
+  animation: cartBounce 0.6s ease 0.3s 2;
+}
+
+.cart-coupon-code {
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.cart-gradient-text {
+  background: linear-gradient(135deg, #0891b2, #059669);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cart-coupon-gradient-text {
+  background: linear-gradient(135deg, #059669, #0891b2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cart-coupon-primary-btn {
+  background: linear-gradient(135deg, #059669, #0891b2);
+  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+}
+
+.cart-checkout-input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #1f2937;
+  font-size: 12px;
+  outline: none;
+}
+
+.cart-checkout-input:focus {
+  border-color: #08aaa6;
+  box-shadow: 0 0 0 1px #08aaa6;
+}
+
+.cart-checkout-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.cart-summary-heading {
+  font-family: "Manrope", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 100%;
+}
+
+.cart-summary-box {
+  width: 730px;
+  max-width: 100%;
+  min-height: 59px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  opacity: 1;
+}
+
+.cart-summary-box.is-open {
+  background: #efffff;
+}
+
+.cart-summary-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 59px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: #202020;
+  text-align: left;
+}
+
+.cart-summary-box.is-open .cart-summary-toggle {
+  background: #008f8b;
+  color: #ffffff;
+}
+
+.cart-summary-box.is-open .cart-summary-heading {
+  color: #ffffff;
+}
+
+.cart-payment-box {
+  width: 730px;
+  max-width: 100%;
+  min-height: 59px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  opacity: 1;
+}
+
+.cart-payment-box.is-open {
+  background: #efffff;
+}
+
+.cart-payment-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 59px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: #202020;
+  font-family: "Manrope", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 100%;
+  text-align: left;
+}
+
+.cart-payment-box.is-open .cart-payment-toggle {
+  background: #008f8b;
+  color: #ffffff;
+}
+
+.cart-schedule-panel {
+  width: 730px;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 6px 6px 0 0;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.cart-schedule-panel:not(.is-open) .cart-schedule-header {
+  background: #ffffff;
+}
+
+.cart-schedule-panel:not(.is-open) .cart-schedule-title {
+  color: #202020;
+}
+
+.cart-schedule-panel:not(.is-open) .cart-schedule-step {
+  background: #12bbb6;
+  color: #ffffff;
+}
+
+.cart-schedule-header {
+  display: flex;
+  min-height: 59px;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  background: #008f8b;
+  padding: 0 16px;
+  text-align: left;
+}
+
+.cart-schedule-step {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #12aaa6;
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cart-schedule-title {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 8px;
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 100%;
+  white-space: nowrap;
+}
+
+.cart-schedule-body {
+  padding: 24px 32px 32px;
+}
+
+.cart-patient-list {
+  display: grid;
+  max-width: 285px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cart-patient-card {
+  overflow: hidden;
+  border: 1px solid #d5e9e8;
+  border-radius: 5px;
+  background: #ffffff;
+}
+
+.cart-patient-card-head {
+  min-height: 34px;
+  background: #12bbb6;
+  padding: 10px 18px 7px;
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 100%;
+}
+
+.cart-patient-card-body {
+  padding: 8px 12px 10px;
+}
+
+.cart-patient-empty {
+  color: #ef4444;
+  font-size: 11px;
+}
+
+.cart-patient-person {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #8b8b8b;
+  font-family: "Manrope", sans-serif;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.cart-patient-check {
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #8fd2cf;
+  color: #12aaa6;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.cart-patient-check::before {
+  content: "\2713";
+}
+
+.cart-patient-copy {
+  min-width: 0;
+}
+
+.cart-patient-copy strong {
+  display: block;
+  color: #5f5f5f;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.cart-patient-copy span {
+  display: inline;
+}
+
+.cart-patient-copy span + span::before {
+  content: ", ";
+}
+
+.cart-patient-copy p {
+  margin: 1px 0 0;
+}
+
+.cart-slot-section {
+  max-width: 650px;
+}
+
+.cart-slot-label {
+  margin-bottom: 14px;
+  color: #008a86;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+}
+
+.cart-slot-row {
+  display: grid;
+  grid-template-columns: 286px 286px;
+  gap: 84px;
+  align-items: center;
+}
+
+.cart-slot-input {
+  width: 286px;
+  height: 28px;
+  border: 1px solid #b8b8b8;
+  background: #ffffff;
+  padding: 0 14px;
+  color: #777777;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  line-height: 28px;
+  outline: none;
+}
+
+.cart-slot-input:focus {
+  border-color: #008f8b;
+}
+
+.cart-slot-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.cart-slot-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  background: #008f8b;
+  color: #ffffff;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.cart-slot-icon::before {
+  content: "\25BE";
+}
+
+.cart-slot-menu {
+  position: absolute;
+  z-index: 20;
+  width: 286px;
+  margin-top: 4px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.cart-slot-option {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  color: #4b5563;
+  font-size: 12px;
+  text-align: left;
+}
+
+.cart-slot-option:hover {
+  background: #efffff;
+}
+
+.cart-slot-note {
+  margin-top: 12px;
+  color: #6b7280;
+  font-family: "Manrope", sans-serif;
+  font-size: 10px;
+  line-height: 100%;
+}
+
+.cart-schedule-next {
+  min-width: 123px;
+  height: 39px;
+  margin-top: 16px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #5cc7c3 0%, #128f8b 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 100%;
+}
+
+@media (max-width: 767px) {
+  .cart-schedule-title {
+    min-height: 0;
+    padding: 3px 6px;
+    font-size: 11px;
+    white-space: normal;
+  }
+
+  .cart-schedule-body {
+    padding: 18px 16px 24px;
+  }
+
+  .cart-patient-list,
+  .cart-slot-section,
+  .cart-slot-input,
+  .cart-slot-menu {
+    max-width: none;
+    width: 100%;
+  }
+
+  .cart-slot-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@keyframes cartConfettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(280px) rotate(720deg) scale(0.4);
+  }
+}
+
+@keyframes cartPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6) translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes cartBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}

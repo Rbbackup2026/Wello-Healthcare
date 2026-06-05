@@ -1,0 +1,277 @@
+import React, { useEffect, useState } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
+import { CartProvider } from './CartContext';
+
+import Dashboard from "../ComponentPage/Dashboard";
+import Category from "../ComponentPage/Category";
+import Department from "../ComponentPage/Department";
+import Admin from "../Admin/Admin";
+import Home from "../../WebsiteComponent/Homecomponents/Home";
+import PrivateRoute from "./PrivateRoute";
+import Forgot from "../../AdminLoginpage/Forgot";
+import DiseasesBanner from "../ComponentPage/DiseasesBanner";
+import Keyfetures from "../ComponentPage/Keyfetures";
+import Types from "../ComponentPage/Types";
+import Diseases from "../ComponentPage/Diseases";
+import Items from "../ComponentPage/Items";
+import CategoryBanner from "../ComponentPage/CategoryBanner";
+import LoginPage from "../../AdminLoginpage/Login";
+import OrderMaster from "../../Components/ComponentPage/CartPage/OrderMaster";
+// import ShoppingCart from "../../WebsiteComponent/VeiwItemPage/ShoppingCart "; // fixed space
+// import AddressPage from "../../WebsiteComponent/VeiwItemPage/AddressPage";
+// import PaymentPage from "../../WebsiteComponent/VeiwItemPage/PaymentPage";
+import OrderConfirmation from "./OrderConfirmation";
+// import ViewItem from "../../WebsiteComponent/VeiwItemPage/ViewItem";
+// import Register from "../../WebsiteComponent/CustomerResgister/Register";
+// import Login from "../../WebsiteComponent/CustomerResgister/Login";
+// import HomeBanner from "../ComponentPage/HomeBanner/HomeBanner";
+// import Pagelist from "../ComponentPage/HomeBanner/Pagelist";
+import Findlab from "../../WebsiteComponent/FindLabComponents/Findlab";
+import LabTestsPage from "../../WebsiteComponent/FindLabComponents/FindTestlab/LabTestsPage";
+import FullbodyHealthPackages from "../../WebsiteComponent/FindLabComponents/Fullbody/FullbodyHealthPackages";
+import ReportsPage from "../../WebsiteComponent/FindLabComponents/REportDownload/ReportsPage";
+import AdminCarouselUpload from "../Admin/AdminCarouselUpload";
+import Pages from "../ComponentPage/PageList/Pages";
+import Certificatetype from "../ComponentPage/Certificatetype";
+import Labs from "../ComponentPage/Labs";
+import StateManagement from "../ComponentPage/MannageLocations/StateManagement";
+import CityManagement from "../ComponentPage/MannageLocations/CityManagement";
+import CountryManagement from "../ComponentPage/MannageLocations/CountryManagement";
+import Blogs from "../ComponentPage/Blogs";
+import BlogDetail from "../../WebsiteComponent/Homecomponents/BlogDetail";
+import BlogCategory from "../ComponentPage/Blogcategory";
+import BlogTags from "../ComponentPage/BlogTags";
+import BlogCategoryDetailPage from "../../WebsiteComponent/Homecomponents/BlogCategoryDetailPage";
+import IteamDetail from "../../WebsiteComponent/Homecomponents/ItemDetail";
+import CartPage from "../../WebsiteComponent/Homecomponents/CartPage";
+import MyOrders from "../../WebsiteComponent/Homecomponents/MyOrders";
+import SavedAddresses from "../../WebsiteComponent/Homecomponents/SavedAddresses";
+import CouponTable from "../ComponentPage/CouponTable";
+import { ToastContainer } from "react-toastify";
+import UserList from "../ComponentPage/UsersPage/UserList";
+import Newsletter from "../ComponentPage/UsersPage/Newsletter";
+import ContactInquiry from "../ComponentPage/UsersPage/ContactInquiry";
+import GetInTouchInquiry from "../ComponentPage/UsersPage/GetInTouchInquiry";
+import CollectionAppointment from "../ComponentPage/UsersPage/CollectionAppointment";
+import TestBookingEnquiry from "../ComponentPage/UsersPage/TestBookingEnquiry";
+import AbandonedCart from "../ComponentPage/UsersPage/AbandonedCart";
+import SMSTemplateManager from "../ComponentPage/SmSPage/SMSTemplateManager";
+import SMSHistory from "../ComponentPage/SmSPage/SMSHistory";
+import ManageNotification from "../ComponentPage/Notification/ManageNotification";
+import GeneralSettings from "../ComponentPage/SystemSetting/GeneralSettings";
+import AdminUserManagement from "../ComponentPage/SystemSetting/AdminUserManagement";
+import MetaManagement from "../ComponentPage/SystemSetting/MetaManagement";
+import AdminLoginHistory from "../ComponentPage/SystemSetting/AdminLoginHistory";
+import LabTestDetailPage from "../../WebsiteComponent/FindLabComponents/FindTestlab/LabTestDetailPage";
+import SitemapViewer from "../ComponentPage/SiteMapViewer/SitemapViewer";
+import CartNotificationPopup from "../../WebsiteComponent/Homecomponents/CartNotificationPopup";
+import { useLocation as useLocationContext } from "./LocationContext";
+import { deslugifyLocation } from "../../utils/cityApi";
+
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+  const locContext = useLocationContext();
+
+  useEffect(() => {
+    // Force immediate scroll to top on every route or search parameter change
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+    // URL से लोकेशन को सिंक करने का लॉजिक (Sitemap लिंक्स के लिए)
+    const searchParams = new URLSearchParams(search);
+    const cityFromQuery = searchParams.get("city"); // ?city=Delhi चेक करता है
+    const pathMatch = pathname.match(/\/labs\/city\/([^/]+)/); // /labs/city/delhi चेक करता है
+    const cityFromPath = pathMatch ? deslugifyLocation(pathMatch[1]) : null;
+
+    const targetCity = cityFromQuery || cityFromPath;
+
+    // Normalize strings to avoid infinite loops due to whitespace or casing
+    const currentCity = locContext?.location?.city?.trim()?.toLowerCase() || "";
+    const normalizedTarget = targetCity?.trim()?.toLowerCase() || "";
+
+    if (normalizedTarget && normalizedTarget !== currentCity) {
+      locContext.setLocation({
+        city: targetCity.trim(),
+        formattedAddress: `${targetCity.trim()}, India`,
+        source: "url_sync",
+      });
+    }
+  }, [pathname, search, locContext]);
+
+  return null;
+}
+
+function MainRoute() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [customerId, setCustomerId] = useState(() => {
+    const user = JSON.parse(localStorage.getItem("customerUser") || "null");
+    return user?._id || user?.id || null;
+  });
+
+  useEffect(() => {
+    const user = localStorage.getItem("adminUser");
+    const token = localStorage.getItem("adminToken");
+
+    if (user && token) {
+      setIsAuthenticated(true);
+    }
+
+    // कस्टमर यूजर सेशन को ट्रैक करने के लिए
+    const syncUser = () => {
+      const u = JSON.parse(localStorage.getItem("customerUser") || "null");
+      setCustomerId(u?._id || u?.id || null);
+    };
+
+    window.addEventListener("customer-auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("customer-auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
+
+  const handleAuthentication = (status) => {
+    localStorage.setItem("isAuthenticated", status);
+    setIsAuthenticated(status);
+  };
+
+  return (
+    <CartProvider>
+      <ScrollToTop />
+      <CartNotificationPopup currentUserId={customerId} />
+      <ToastContainer
+        position="top-right"
+        autoClose={1500}
+        theme="colored"
+      />
+      {/* <Nav /> */}
+      <Routes>
+        {/* Public Routes */}
+       
+        <Route path="/admin_index" element={<LoginPage setIsAuthenticated={handleAuthentication} />} />
+
+        <Route path="/" element={<Home />} />
+        {/* ✅ Dynamic Product Detail Route */}
+        <Route path="/product/:id" element={<IteamDetail />} />
+
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/category_list" element={<Category />} />
+        <Route path="/item_department_list" element={<Department />} />
+        <Route path="/item_diseases_banner_list" element={<DiseasesBanner />} />
+        <Route path="/item_key_fetures_list" element={<Keyfetures />} />
+        <Route path="/item_type_list" element={<Types />} />
+        <Route path="/item_diseases_list" element={<Diseases />} />
+        <Route path="/item_list" element={<Items />} />
+        <Route path="/item_category_banner_list" element={<CategoryBanner />} />
+        {/* <Route path="/bannerlist" element={<HomeBanner />} /> */}
+        <Route path="/forgot-password" element={<Forgot />} />
+        {/* <Route path="/pagelist" element={<Pagelist/>} /> */}
+        <Route path="/bannerlist" element={<AdminCarouselUpload/>} />
+        <Route path="/pagelist" element={<Pages/>} />
+        <Route path="/item_certificate_list" element={<Certificatetype/>} />
+        <Route path="/item_lab_list" element={<Labs/>} />
+        <Route path="/manage_states" element={<StateManagement/>} />
+        <Route path="/manage_cities" element={<CityManagement/>} />
+        <Route path="/manage_countries" element={<CountryManagement/>} />
+        <Route path="/manage_blogs" element={<Blogs/>} />
+        <Route path="/blog_categories" element={<BlogCategory/>} />
+        <Route path="/blog_tags" element={<BlogTags/>} />
+        <Route path="/discount" element={<CouponTable/>} />
+        <Route path="/customer_list" element={<UserList/>} />
+        <Route path="/newsletter_list" element={<Newsletter/>} />
+        <Route path="/help_list" element={<ContactInquiry/>} />
+        <Route path="/get_tuch_inq_list" element={<GetInTouchInquiry/>} />
+        <Route path="/collection_appointment_list" element={<CollectionAppointment/>} />
+        <Route path="/test_booking_enquiry_list" element={<TestBookingEnquiry/>} />
+        <Route path="/abandoned_cart" element={<AbandonedCart/>} />
+        <Route path="/sms_template" element={<SMSTemplateManager/>} />
+        <Route path="/sms_gateway" element={<SMSHistory/>} />
+        <Route path="/notification_logs" element={<ManageNotification/>} />
+        <Route path="/general_setting" element={<GeneralSettings/>} />
+        <Route path="/admin_setting" element={<AdminUserManagement/>} />
+        <Route path="/meta_setting" element={<MetaManagement/>} />
+        <Route path="/login_history" element={<AdminLoginHistory/>} />
+
+
+        {/* Cart Routes */}
+        <Route path="/order_list" element={<OrderMaster />} />
+        {/* <Route path="/cart/:id" element={<ShoppingCart />} /> */}
+        {/* <Route path="/address" element={<AddressPage />} /> */}
+        {/* <Route path="/payment" element={<PaymentPage />} /> */}
+        <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+        {/* <Route path="/register" element={<Register />} /> */}
+        {/* <Route path="/login" element={<Login />} /> */}
+
+
+        {/* Protected Admin Routes */}
+        <Route
+  path="/admin"
+  element={
+    <PrivateRoute isAuthenticated={isAuthenticated}>
+      <Admin />
+    </PrivateRoute>
+  }
+>
+  <Route index element={<Dashboard />} />
+
+  <Route path="category_list" element={<Category />} />
+  <Route path="item_department_list" element={<Department />} />
+  <Route path="item_diseases_banner_list" element={<DiseasesBanner />} />
+  <Route path="item_key_fetures_list" element={<Keyfetures />} />
+  <Route path="item_type_list" element={<Types />} />
+  <Route path="item_diseases_list" element={<Diseases />} />
+  <Route path="item_list" element={<Items />} />
+  <Route path="item_category_banner_list" element={<CategoryBanner />} />
+  <Route path="bannerlist" element={<AdminCarouselUpload />} />
+  <Route path="pagelist" element={<Pages />} />
+  <Route path="item_certificate_list" element={<Certificatetype />} />
+  <Route path="item_lab_list" element={<Labs />} />
+  <Route path="manage_states" element={<StateManagement />} />
+  <Route path="manage_cities" element={<CityManagement />} />
+  <Route path="manage_countries" element={<CountryManagement />} />
+  <Route path="manage_blogs" element={<Blogs />} />
+  <Route path="blog_categories" element={<BlogCategory />} />
+  <Route path="blog_tags" element={<BlogTags />} />
+  <Route path="discount" element={<CouponTable />} />
+  <Route path="customer_list" element={<UserList />} />
+  <Route path="newsletter_list" element={<Newsletter />} />
+  <Route path="help_list" element={<ContactInquiry />} />
+  <Route path="get_tuch_inq_list" element={<GetInTouchInquiry />} />
+  <Route path="collection_appointment_list" element={<CollectionAppointment />} />
+  <Route path="test_booking_enquiry_list" element={<TestBookingEnquiry />} />
+  <Route path="abandoned_cart" element={<AbandonedCart />} />
+  <Route path="sms_template" element={<SMSTemplateManager />} />
+  <Route path="sms_gateway" element={<SMSHistory />} />
+  <Route path="notification_logs" element={<ManageNotification />} />
+  <Route path="general_setting" element={<GeneralSettings />} />
+  <Route path="admin_setting" element={<AdminUserManagement />} />
+  <Route path="meta_setting" element={<MetaManagement />} />
+  <Route path="login_history" element={<AdminLoginHistory />} />
+
+  <Route path="order_list" element={<OrderMaster />} />
+  <Route path="sitemap_manager" element={<SitemapViewer />} />
+</Route>
+
+        {/* Website Router */}
+        {/* Removed duplicate home route to prevent rendering conflicts */}
+                <Route path="/labs/city/:citySlug" element={<Findlab/>} />
+                <Route path="/lab-tests" element={<LabTestsPage/>} />
+                <Route path="/lab-tests/:city/:testName" element={<LabTestDetailPage />} />
+                <Route path="/full-body-health-checkup" element={<FullbodyHealthPackages/>} />
+                <Route path="/download-report" element={<ReportsPage/>} />
+                <Route path="/blog/:id" element={<BlogDetail />} />
+                <Route path="/blog-category/:slug" element={<BlogCategoryDetailPage/>} />
+                <Route path="/iteampage" element={<IteamDetail/>} />
+                <Route path="/cart_section" element={<CartPage/>} />
+                <Route path="/my-orders" element={<MyOrders />} />
+                <Route path="/saved-addresses" element={<SavedAddresses />} />
+
+
+
+
+      </Routes>
+    </CartProvider>
+  );
+}
+
+export default MainRoute;

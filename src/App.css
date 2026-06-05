@@ -1,7 +1,0 @@
-/* Global CSS में */
-.MuiDrawer-paper {
-  position: sticky !important;
-  top: 0 !important;
-  height: 100vh !important;
-  overflow-y: auto !important;
-}

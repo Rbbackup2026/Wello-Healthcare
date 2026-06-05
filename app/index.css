@@ -1,0 +1,69 @@
+﻿@import "tailwindcss";
+
+@source "./**/*.{js,jsx,ts,tsx,mdx}";
+@source "../app/**/*.{js,jsx,ts,tsx,mdx}";
+@source "../pages/**/*.{js,jsx,ts,tsx,mdx}";
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #ffffff;
+    color: #0f172a;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* à¤ªà¥ˆà¤¨à¤² à¤–à¥à¤²à¤¨à¥‡ à¤ªà¤° à¤¸à¥à¤•à¥à¤°à¥‰à¤² à¤°à¥‹à¤•à¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ */
+  body.no-scroll {
+    overflow: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  #__next,
+  body > div {
+    max-width: 100%;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+

@@ -1,0 +1,1785 @@
+﻿.pdf-home-page {
+  background: #ffffff;
+}
+
+.wello-sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #f8fdff;
+}
+
+.wello-sticky-header .wello-topbar,
+.wello-sticky-header .wello-nav-shell {
+  position: static !important;
+}
+
+.wello-sticky-header + * {
+  margin-top: 162px;
+}
+
+.wello-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.wello-hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 32px 32px;
+}
+
+.wello-hero-actions-inner {
+  padding-top: 0;
+}
+
+.wello-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 40px;
+  min-height: 400px;
+}
+
+.wello-hero-title {
+  font-size: clamp(28px, 4vw, 46px);
+  color: #0f2137;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.wello-hero-plain {
+  color: #000000;
+  font-weight: 500;
+}
+
+.wello-accent {
+  color: #12bdb8;
+  font-weight: 800;
+}
+
+.wello-hero-text {
+  color: #4a5568;
+  font-size: 15px;
+  line-height: 1.75;
+  margin-bottom: 32px;
+  max-width: 480px;
+}
+
+.wello-hero-media {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.wello-hero-media img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.wello-banner-slider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.wello-banner-slide {
+  width: 100%;
+  will-change: opacity, transform;
+}
+
+.wello-banner-slide.exit-next {
+  animation: bExitNext 0.32s ease forwards;
+}
+
+.wello-banner-slide.exit-prev {
+  animation: bExitPrev 0.32s ease forwards;
+}
+
+.wello-banner-slide.enter-next {
+  animation: bEnterNext 0.35s ease forwards;
+}
+
+.wello-banner-slide.enter-prev {
+  animation: bEnterPrev 0.35s ease forwards;
+}
+
+@keyframes bExitNext {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+}
+
+@keyframes bExitPrev {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+}
+
+@keyframes bEnterNext {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bEnterPrev {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.wello-banner-slide img {
+  width: min(calc(100% - 64px), 1376px);
+  height: auto;
+  max-height: 520px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.wello-banner-clickable {
+  cursor: pointer;
+}
+
+.wello-banner-slide .wello-hero-inner {
+  padding-top: 32px;
+}
+
+.wello-dots {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0 6px;
+  line-height: 1;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.wello-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e0;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s, width 0.3s;
+  padding: 0;
+}
+
+.wello-dot.active {
+  background: #12bdb8;
+  width: 24px;
+  border-radius: 4px;
+}
+
+.wello-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.wello-action-card {
+  background: #df;
+  border-radius: 12px;
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: #0f2137;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.07);
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1px solid #e8f0fe;
+}
+
+.wello-action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+}
+
+.wello-action-card.lab-test-card {
+  background: #047F7B;
+  color: #ffffff;
+  border-color: #047F7B;
+}
+
+.wello-action-card.lab-test-card p,
+.wello-action-card.lab-test-card h3 {
+  color: #ffffff;
+}
+
+.wello-action-card.lab-test-card .wello-action-arrow {
+  background: #ffffff;
+  color: #047F7B;
+}
+
+.wello-action-card.lab-test-card:hover .wello-action-arrow {
+  color: #047F7B;
+}
+
+.wello-action-card.book-scans-card {
+  background: #07A39E;
+  color: #ffffff;
+  border-color: #07A39E;
+}
+
+.wello-action-card.book-scans-card p,
+.wello-action-card.book-scans-card h3 {
+  color: #ffffff;
+}
+
+.wello-action-card.book-scans-card .wello-action-arrow {
+  background: #ffffff;
+  color: #07A39E;
+}
+
+.wello-action-card.book-scans-card:hover .wello-action-arrow {
+  color: #07A39E;
+}
+
+.wello-action-card.prescription-card {
+  background: #09B6B1;
+  color: #ffffff;
+  border-color: #09B6B1;
+}
+
+.wello-action-card.prescription-card p,
+.wello-action-card.prescription-card h3 {
+  color: #ffffff;
+}
+
+.wello-action-card.prescription-card .wello-action-arrow {
+  background: #ffffff;
+  color: #09B6B1;
+}
+
+.wello-action-card.prescription-card:hover .wello-action-arrow {
+  color: #09B6B1;
+}
+
+.wello-action-card.reports-card {
+  background: #18D5CF;
+  color: #ffffff;
+  border-color: #18D5CF;
+}
+
+.wello-action-card.reports-card p,
+.wello-action-card.reports-card h3 {
+  color: #ffffff;
+}
+
+.wello-action-card.reports-card .wello-action-arrow {
+  background: #ffffff;
+  color: #18D5CF;
+}
+
+.wello-action-card.reports-card:hover .wello-action-arrow {
+  color: #18D5CF;
+}
+
+.wello-action-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wello-action-icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 8px;
+}
+
+.wello-action-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wello-action-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wello-action-card p {
+  font-size: 12px;
+  color: #718096;
+  margin: 0;
+}
+
+.wello-action-arrow {
+  color: #cbd5e0;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-left: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wello-action-card:hover .wello-action-arrow {
+  color: #12bdb8;
+}
+
+@media (max-width: 900px) {
+  .wello-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .wello-hero-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .wello-hero-media {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .wello-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pdf-section {
+  padding: 56px 0;
+  background: #ffffff;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 620px;
+}
+
+.pdf-product-section {
+  background: #ffffff;
+  padding: 40px 0;
+  min-height: 500px;
+  width: 100%;
+  font-family: 'Manrope', sans-serif;
+}
+
+
+.pdf-fullbody-section {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F9F9F9 100%);
+}
+
+.pdf-fullbody-section .pdf-left-title,
+.pdf-fullbody-section .pdf-tabs {
+  margin-left: 94px;
+}
+
+.pdf-product-section .pdf-left-title {
+  margin-left: 94px;
+}
+
+.pdf-fullbody-section .pdf-left-title {
+  margin-left: 94px;
+}
+
+.pdf-category-band {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F9F9F9 100%);
+  padding: 40px 0;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  font-family: 'Manrope', sans-serif;
+}
+
+.pdf-section-inner {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.pdf-left-title,
+.pdf-center-title {
+  margin: 12px 0 18px;
+  color: #3f3f3f;
+  font-family: 'Manrope', sans-serif;
+  font-size: 33.73px;
+  line-height: 42.17px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pdf-center-title {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.pdf-left-title .pdf-highlight,
+.pdf-center-title .pdf-highlight {
+  color: #07BEB8;
+}
+
+.pdf-tabs {
+  margin: 0 0 28px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pdf-tabs a {
+  min-height: 34px;
+  padding: 7px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #a7eeee;
+  border-radius: 5px;
+  background: #ecfffd;
+  color: #007f7a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pdf-tabs a.active {
+  background: #008a85;
+  color: #ffffff;
+  border-color: #008a85;
+}
+
+.pdf-slider-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 54px;
+}
+
+.pdf-slider-content {
+  width: 100%;
+  max-width: 1100px;
+  overflow: hidden;
+  margin: 0 auto;
+  scroll-behavior: smooth;
+}
+
+.pdf-slider-content::-webkit-scrollbar {
+  display: none;
+}
+
+.pdf-round-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #008a85;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0, 138, 133, 0.18);
+  transition: background 0.2s;
+}
+
+.pdf-round-arrow:first-child {
+  left: 0;
+}
+
+.pdf-round-arrow:last-child {
+  right: 0;
+}
+
+.pdf-round-arrow:disabled {
+  background: #b2d8d6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.pdf-product-grid,
+.pdf-risk-grid,
+.pdf-category-grid,
+.pdf-scan-grid,
+.pdf-testimonial-grid {
+  display: grid;
+  gap: 28px;
+}
+
+.pdf-product-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pdf-product-section .pdf-product-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 28px;
+}
+
+.pdf-product-section .pdf-product-card {
+  flex: 0 0 calc((100% - 56px) / 3);
+  min-width: 0;
+}
+
+.pdf-product-card {
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+  contain: layout paint;
+}
+
+.pdf-product-head {
+  position: relative;
+  min-height: 84px;
+  padding: 18px 24px;
+  background: #12bdb8;
+  color: #ffffff;
+}
+
+.pdf-product-head {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.pdf-product-head h3 {
+  margin: 0;
+  max-width: 230px;
+  font-size: 21px;
+  line-height: 1.22;
+  font-weight: 850;
+}
+
+.pdf-product-head span {
+  position: absolute;
+  top: 0;
+  right: 12px;
+  min-width: 78px;
+  padding: 5px 10px;
+  border-radius: 0 0 8px 8px;
+  background: #007b76;
+  color: #ffffff;
+  font-size: 12px;
+  text-align: center;
+}
+
+.pdf-price-row {
+  min-height: 58px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #FAFAFA;
+  border-bottom: 1px solid #9ee8e5;
+}
+
+.pdf-price-row del {
+  color: #353535;
+  font-size: 15px;
+}
+
+.pdf-price-row strong {
+  color: #007b76;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.pdf-price-row span {
+  min-width: 92px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #61d7d1;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 4px 9px rgba(15, 23, 42, 0.18);
+}
+
+.pdf-product-body {
+  padding: 16px 24px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  row-gap: 12px;
+  color: #3f3f3f;
+}
+
+.pdf-product-body p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 450;
+}
+
+.pdf-product-body svg {
+  color: #12bdb8;
+}
+
+.pdf-product-body small {
+  display: block;
+  margin-left: 30px;
+  color: #777777;
+  font-size: 14px;
+}
+
+.pdf-product-body a {
+  color: #00a8a3;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.pdf-product-body .pdf-add-cart {
+  min-width: 122px;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 5px;
+  background: #008a85;
+  color: #ffffff;
+  text-align: center;
+}
+
+.pdf-risk-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pdf-risk-track {
+  display: flex;
+  gap: 28px;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+
+.pdf-risk-track .pdf-risk-card {
+  width: 300px;
+  flex: 0 0 300px;
+}
+
+.pdf-risk-card {
+  min-height: 286px;
+  padding: 26px 30px 22px;
+  border: 1px solid #e6f4f3;
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+  contain: layout paint;
+}
+
+.pdf-risk-card > svg {
+  width: 78px;
+  height: 78px;
+  color: #12bdb8;
+}
+
+.pdf-risk-card h3 {
+  margin: 16px 0 8px;
+  color: #3f3f3f;
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.pdf-risk-card p {
+  margin: 0;
+  color: #888888;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.pdf-risk-card a {
+  display: inline-flex;
+  margin-top: 18px;
+  color: #047F7B;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pdf-category-grid {
+  display: flex;
+  gap: 30px;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+
+.pdf-category-card {
+  width: 256px;
+  height: 210px;
+  flex: 0 0 256px;
+  scroll-snap-align: start;
+  padding: 26px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border-radius: 20px;
+  background: #12bdb8;
+  color: #ffffff;
+  box-shadow: 0 7px 16px rgba(15, 23, 42, 0.18);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+  will-change: transform;
+}
+
+.pdf-category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(18, 189, 184, 0.38);
+}
+
+.pdf-category-icon-wrapper {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.pdf-category-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.pdf-category-card span {
+  font-size: 21px;
+  font-weight: 800;
+}
+
+
+.pdf-platform-title,
+.pdf-testimonial-title {
+  margin: 0;
+  color: #3f3f3f;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 33.73px;
+  line-height: 42.17px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pdf-platform-title span,
+.pdf-testimonial-title span {
+  color: #008a85;
+}
+
+.pdf-platform-text {
+  max-width: 770px;
+  margin: 28px auto 48px;
+  color: #aaa;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.pdf-process-section {
+  padding: 50px 0 32px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F9F9F9 100%);
+}
+
+.pdf-process-section .pdf-section-inner {
+  max-width: 1130.3px;
+  min-height: 513.16px;
+}
+
+.pdf-process-grid {
+  max-width: 1120px;
+  margin: 34px auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(320px, 0.78fr);
+  align-items: center;
+  gap: 48px;
+}
+
+.pdf-steps {
+  display: grid;
+  gap: 24px;
+}
+
+.pdf-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.pdf-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 27px;
+  top: 60px;
+  width: 2px;
+  height: calc(100% - 34px);
+  border-left: 2px dashed #bfeef4;
+}
+
+.pdf-step span {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #008a85;
+  color: #ffffff;
+  font-size: 23px;
+  box-shadow: 0 8px 18px rgba(0, 138, 133, 0.18);
+}
+
+.pdf-step-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.pdf-step h3 {
+  margin: 6px 0 12px;
+  color: #3f3f3f;
+  font-family: 'Manrope', sans-serif;
+  font-size: 28px;
+  line-height: 1.12;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.pdf-step p {
+  margin: 0;
+  color: #5f6c6f;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.pdf-process-doctor {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 499.48px;
+  height: 419.56px;
+  min-height: 419.56px;
+  transform: translateX(-100px);
+}
+
+.pdf-process-doctor img {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 419px);
+  max-height: 419.56px;
+  object-fit: contain;
+}
+
+.pdf-process-doctor::before {
+  content: "";
+  position: absolute;
+  right: 46px;
+  bottom: 0;
+  width: 335px;
+  height: 298px;
+  border: 2px solid #77d9d5;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #e9fffd, #bdf4ef);
+}
+
+.pdf-process-doctor div {
+  position: absolute;
+  z-index: 3;
+  right: -6px;
+  bottom: 34px;
+  min-height: 48px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0070bc;
+  font-size: 16px;
+  font-weight: 850;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.pdf-process-doctor div svg {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 4px;
+  background: #e8f5ff;
+  color: #0070bc;
+}
+
+.pdf-scan-section .pdf-section-inner {
+  width: min(100%, 1310px);
+}
+
+.pdf-scan-grid {
+  grid-template-columns: repeat(3, minmax(350px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.pdf-scan-card {
+  width: 350px;
+  min-height: 417.128px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #62d6d1;
+  color: #ffffff;
+  text-align: center;
+  box-shadow: 0 7px 16px rgba(15, 23, 42, 0.16);
+  contain: layout paint;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pdf-scan-card img {
+  width: 100%;
+  height: 239px;
+  object-fit: cover;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.pdf-scan-card div {
+  padding: 16px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.pdf-scan-card h3 {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 25px;
+  line-height: 100%;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pdf-scan-card p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.pdf-scan-card strong {
+  display: block;
+  margin-top: 1px;
+  font-size: 20px;
+}
+
+.pdf-scan-card a {
+  position: relative;
+  z-index: 1;
+  width: 194px;
+  height: 49px;
+  margin: 24px auto 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: #008a85;
+  color: #ffffff;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.pdf-scan-card a::before,
+.pdf-scan-card a::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 78px;
+  height: 1px;
+  background: #AFEDEB;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.pdf-scan-card a::before {
+  right: 100%;
+}
+
+.pdf-scan-card a::after {
+  left: 100%;
+}
+
+
+.pdf-testimonial-title {
+  max-width: 620px;
+  margin: 0 auto 40px;
+}
+
+.pdf-testimonial-title span {
+  display: block;
+}
+
+.pdf-testimonial-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.pdf-testimonial-grid article {
+  min-height: 122px;
+  padding: 22px 34px;
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  align-items: center;
+  gap: 24px;
+  border: 1px solid #74ddd9;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.pdf-testimonial-grid img {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.pdf-testimonial-grid p {
+  margin: 0;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.pdf-faq-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.5fr;
+  align-items: center;
+  gap: 80px;
+}
+
+.pdf-faq-pill {
+  min-height: 42px;
+  padding: 10px 28px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #12bdb8;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pdf-faq-grid h2 {
+  margin: 34px 0 18px;
+  color: #3f3f3f;
+  font-family: 'Manrope', sans-serif;
+  font-size: 33.73px;
+  line-height: 100%;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pdf-faq-grid p {
+  margin: 0;
+  color: #3f3f3f;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.pdf-faq-list {
+  display: grid;
+  gap: 18px;
+}
+
+.pdf-faq-list article {
+  padding: 22px 38px;
+  border: 1px solid #8fe4e0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.12);
+}
+
+.pdf-faq-list article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pdf-faq-list h3 {
+  margin: 0;
+  color: #3f3f3f;
+  font-family: 'Manrope', sans-serif;
+  font-size: 25px;
+  line-height: 100%;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.pdf-faq-list svg {
+  min-width: 26px;
+  min-height: 26px;
+  padding: 6px;
+  border-radius: 6px;
+  background: #12bdb8;
+  color: #ffffff;
+}
+
+.pdf-faq-list .open p {
+  margin-top: 14px;
+  color: #888;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.pdf-blogs-section {
+  padding: 48px 0 56px;
+  background: #ffffff;
+}
+
+.pdf-blogs-section .pdf-section-inner {
+  width: min(100%, 1242px);
+}
+
+.pdf-blogs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 386px);
+  justify-content: center;
+  gap: 20px;
+}
+
+.pdf-blog-card {
+  width: 386px;
+  height: 449px;
+  opacity: 1;
+  transform: rotate(0deg);
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+}
+
+.pdf-blog-card img {
+  width: 100%;
+  height: 257px;
+  display: block;
+  object-fit: cover;
+}
+
+.pdf-blog-card div {
+  height: 192px;
+  padding: 24px;
+}
+
+.pdf-blog-card h3 {
+  max-width: 300px;
+  margin: 0 0 24px;
+  color: #000000;
+  font-family: 'Manrope', sans-serif;
+  font-size: 25px;
+  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pdf-blog-card a {
+  min-width: 149px;
+  min-height: 43px;
+  padding: 10px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: #07BEB8;
+  color: #ffffff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+.wello-blogs-page {
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.wello-blogs-main {
+  background: #ffffff;
+}
+
+.wello-blogs-section {
+  width: min(100%, 1272px);
+  margin: 0 auto;
+  padding: 8px 14px 20px;
+  font-family: 'Manrope', sans-serif;
+}
+
+.wello-blogs-section h1 {
+  margin: 0 0 32px;
+  color: #3f3f3f;
+  font-family: 'Manrope', sans-serif;
+  font-size: 32px;
+  line-height: 100%;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.wello-blogs-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 386px));
+  justify-content: center;
+  gap: 38px 42px;
+}
+
+.wello-blogs-message {
+  margin: 24px 0 0;
+  color: #6b7280;
+  text-align: center;
+  font-size: 18px;
+}
+
+.wello-blog-list-card {
+  width: 386px;
+  height: 453px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  opacity: 1;
+  transform: rotate(0deg);
+  box-shadow: 0 8px 19px rgba(15, 23, 42, 0.22);
+}
+
+.wello-blog-list-card img {
+  width: 100%;
+  height: 194px;
+  display: block;
+  object-fit: cover;
+  border-radius: 7px;
+  background: #edf2f7;
+}
+
+.wello-blog-list-card h2 {
+  min-height: 51px;
+  margin: 20px 0 1px;
+  color: #07beb8;
+  font-size: 22px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.wello-blog-list-card p {
+  height: 82px;
+  margin: 0 0 24px;
+  color: #8a8a8a;
+  font-size: 16px;
+  line-height: 1.34;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wello-blog-card-faqs {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.wello-blog-card-faqs details {
+  border: 1px solid #d7eeee;
+  border-radius: 8px;
+  background: #f7fbfb;
+}
+
+.wello-blog-card-faqs summary {
+  padding: 10px 12px;
+  color: #1f4f4d;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wello-blog-card-faqs p {
+  min-height: 0;
+  margin: 0;
+  padding: 0 12px 12px;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.45;
+  display: block;
+  overflow: visible;
+}
+
+.wello-blog-list-card a {
+  width: 123px;
+  height: 36px;
+  flex: 0 0 36px;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #047F7B;
+  border-radius: 10px;
+  color: #047F7B;
+  background: #ffffff;
+  opacity: 1;
+  transform: rotate(0deg);
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.wello-blogs-load-more {
+  width: 236px;
+  height: 67px;
+  margin: 42px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: #008a85;
+  color: #ffffff;
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pdf-home-footer {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  background: #ffffff;
+  font-family: 'Manrope', sans-serif;
+}
+
+.pdf-home-footer-links {
+  padding: 32px 100px 24px;
+  background: #ffffff;
+}
+
+.pdf-home-footer-row {
+  border-bottom: 1px solid #ebebeb;
+}
+
+.pdf-home-footer-row button {
+  width: 100%;
+  min-height: 74px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  color: #2f2f2f;
+  font-family: 'Manrope', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 520;
+  letter-spacing: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pdf-home-footer-row p {
+  margin: -8px 52px 20px 0;
+  color: #8f8f8f;
+  font-size: 14px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.pdf-home-footer-toggle {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #008a85;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.pdf-home-footer-main {
+  min-height: 270px;
+  padding: 42px 80px 34px;
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr 0.75fr 1.35fr;
+  gap: 70px;
+  background: #078a82;
+  color: #ffffff;
+}
+
+.pdf-home-footer-brand h2 {
+  margin: 0;
+  color: #ffffff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 57.04px;
+  line-height: 100%;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pdf-home-footer-brand {
+  width: 335px;
+  height: 199px;
+}
+
+.pdf-home-footer-brand span {
+  display: block;
+  margin-top: 2px;
+  color: #ffffff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 20px;
+  line-height: 100%;
+  font-weight: 400;
+  letter-spacing: 0.45em;
+}
+
+.pdf-home-footer-main h3 {
+  margin: 0 0 16px;
+  color: #ffffff;
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.pdf-home-footer-main a,
+.pdf-home-footer-main p {
+  margin: 0 0 10px;
+  display: block;
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight:100;
+  font-style: normal;
+  text-decoration: none;
+}
+
+.pdf-home-footer-main a *,
+.pdf-home-footer-main p * {
+  font-weight: 100;
+}
+
+.pdf-home-footer-brand p {
+  margin-top: 16px;
+  max-width: 335px;
+  font-size: 18px;
+}
+
+.pdf-home-footer-reach p {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-left: 0;
+  font-size: 18px;
+  font: 400 17px 'Manrope', sans-serif;
+}
+
+.pdf-home-footer-reach p svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  padding: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #078a82;
+}
+
+.pdf-home-footer-socials {
+  display: flex;
+  gap: 12px;
+}
+
+.pdf-home-footer-socials span {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #078a82;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.pdf-home-footer-copy {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #4b4b4b;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+@media (max-width: 980px) {
+  .wello-sticky-header + * {
+    margin-top: 118px;
+  }
+
+  .pdf-home-page,
+  .pdf-section,
+  .pdf-section-inner {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .pdf-slider-shell {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+
+  .pdf-round-arrow {
+    display: none;
+  }
+
+  .pdf-product-grid,
+  .pdf-risk-grid,
+  .pdf-category-grid,
+  .pdf-scan-grid,
+  .pdf-testimonial-grid,
+  .pdf-blogs-grid,
+  .pdf-process-grid,
+  .pdf-faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-product-section .pdf-slider-content {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .pdf-product-section .pdf-product-card {
+    flex-basis: 100%;
+  }
+
+  .pdf-section-inner {
+    padding: 0 18px;
+  }
+
+  .wello-banner-slide img {
+    width: calc(100% - 36px);
+  }
+
+  .pdf-category-band .pdf-slider-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .pdf-category-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+  }
+
+  .pdf-category-card {
+    flex: 0 0 210px;
+  }
+
+  .pdf-product-card,
+  .pdf-risk-card,
+  .pdf-scan-card,
+  .pdf-blog-card {
+    max-width: 100%;
+  }
+
+  .pdf-platform-title,
+  .pdf-testimonial-title {
+    font-size: 30px;
+  }
+
+  .pdf-left-title,
+  .pdf-center-title {
+    font-size: 26px;
+  }
+
+  .pdf-fullbody-section .pdf-left-title,
+  .pdf-fullbody-section .pdf-tabs,
+  .pdf-product-section .pdf-left-title {
+    margin-left: 0;
+  }
+
+  .fb-package-topbar h1 {
+    font-size: 24px;
+  }
+
+  .pdf-process-section {
+    padding: 40px 0;
+  }
+
+  .pdf-process-grid {
+    gap: 28px;
+  }
+
+  .pdf-step {
+    grid-template-columns: 48px 1fr;
+    gap: 16px;
+  }
+
+  .pdf-step:not(:last-child)::after {
+    left: 23px;
+    top: 52px;
+  }
+
+  .pdf-step span {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .pdf-step h3 {
+    font-size: 22px;
+    white-space: normal;
+  }
+
+  .pdf-step p {
+    font-size: 13px;
+  }
+
+  .pdf-process-doctor {
+    min-height: 350px;
+    transform: none;
+  }
+
+  .pdf-process-doctor::before {
+    right: 50%;
+    width: min(82vw, 300px);
+    height: 240px;
+    transform: translateX(50%);
+  }
+
+  .pdf-process-doctor img {
+    width: min(88vw, 350px);
+    max-height: 350px;
+  }
+
+  .pdf-process-doctor div {
+    right: 50%;
+    bottom: 20px;
+    width: max-content;
+    max-width: calc(100vw - 36px);
+    transform: translateX(50%);
+    font-size: 14px;
+  }
+
+  .pdf-blogs-grid {
+    grid-template-columns: minmax(0, 386px);
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .pdf-home-footer-links {
+    padding: 24px 18px;
+  }
+
+  .pdf-home-footer-main {
+    padding: 32px 24px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .wello-blogs-section {
+    padding: 24px 16px 34px;
+  }
+
+  .wello-blogs-section h1 {
+    margin-bottom: 22px;
+    font-size: 28px;
+  }
+
+  .wello-blogs-list {
+    grid-template-columns: minmax(0, 386px);
+    gap: 24px;
+  }
+
+  .wello-blog-list-card {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .wello-blog-list-card img {
+    height: auto;
+    aspect-ratio: 333 / 194;
+  }
+
+  .wello-blogs-load-more {
+    width: 210px;
+    height: 58px;
+    font-size: 22px;
+  }
+
+}

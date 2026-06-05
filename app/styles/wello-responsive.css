@@ -1,0 +1,93 @@
+﻿@media (max-width: 900px) {
+  .wello-topbar-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    padding: 10px 12px !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .wello-logo {
+    width: 128px !important;
+    max-width: 128px !important;
+    height: auto !important;
+  }
+
+  .wello-logo-link {
+    width: 132px !important;
+    height: 48px !important;
+    flex: 0 0 132px !important;
+    align-self: center !important;
+  }
+
+  .wello-header-btn,
+  .wello-header-link {
+    display: none;
+  }
+
+  .wello-search-wrap {
+    order: 3 !important;
+    flex: 0 0 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .wello-search-box {
+    width: 100% !important;
+    height: 40px !important;
+  }
+
+  .wello-search-box input {
+    min-width: 0 !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+  }
+
+  .wello-main-content {
+    /* Mobile par nav hidden hai, isliye sirf topbar ka space */
+    padding-top: 100px !important;
+  }
+
+  .wello-mobile-profile {
+    display: block !important;
+    margin-left: auto !important;
+  }
+
+  .wello-nav-shell {
+    display: none !important;
+  }
+
+  .wello-hero-inner {
+    padding: 40px 18px;
+  }
+
+  .wello-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wello-hero-copy {
+    transform: none;
+  }
+
+  .wello-hero-title {
+    font-size: 36px;
+  }
+
+  .wello-actions {
+    grid-template-columns: 1fr;
+    margin-top: 24px;
+  }
+
+  .wello-hero-curve {
+    display: none;
+  }
+
+  .wello-city-strip {
+    padding: 12px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
