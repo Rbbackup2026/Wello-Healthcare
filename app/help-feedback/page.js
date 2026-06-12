@@ -1,27 +1,27 @@
-import BlogsPage from "../WebsiteComponent/Homecomponents/BlogsPage";
+import HelpFeedback from "../WebsiteComponent/Homecomponents/HelpFeedback";
 import JsonLd from "../WebsiteComponent/Homecomponents/JsonLd";
 import {
   PAGE_SEO,
   breadcrumbSchema,
   buildPageMetadata,
-  collectionPageSchema,
+  webPageSchema,
 } from "../utils/seo";
 
-export const metadata = buildPageMetadata(PAGE_SEO.blogs);
+export const metadata = buildPageMetadata(PAGE_SEO.helpFeedback);
 
 export default function Page() {
   return (
     <>
       <JsonLd
         data={[
-          collectionPageSchema(PAGE_SEO.blogs),
+          webPageSchema(PAGE_SEO.helpFeedback),
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Blogs", path: "/blogs" },
+            { name: "Help & Feedback", path: "/help-feedback" },
           ]),
         ]}
       />
-      <BlogsPage />
+      <HelpFeedback />
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { useParams as useNextParams, usePathname, useRouter } from "next/navigation";
+import { startNavigationLoader } from "../utils/navigationLoader";
 
 export function Link({ to, href, children, ...props }) {
   return (
@@ -24,6 +25,8 @@ export function useNavigate() {
     }
 
     if (!target) return;
+
+    startNavigationLoader();
 
     if (options.replace) {
       router.replace(target);

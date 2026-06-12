@@ -22,7 +22,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
-import CouponFormDialog from "../DailogForm/CouponFormDialog"; // ✅ Import dialog
+import CouponFormDialog from "../DailogForm/CouponFormDialog";
+import WalletSettingsPanel from "../DailogForm/WalletSettingsPanel";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -31,6 +32,7 @@ const CouponTable = () => {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("coupons");
 
   // ================== FETCH COUPONS ==================
   const fetchCoupons = async () => {
@@ -78,10 +80,31 @@ const CouponTable = () => {
         </IconButton>
         <Typography>
           <Box component="span" sx={{ cursor: "pointer" }}>Manage Coupons /</Box>
-          <Box component="span" sx={{ color: "#347deb", ml: 1 }}>Coupons</Box>
+          <Box component="span" sx={{ color: "#347deb", ml: 1 }}>
+            {activeTab === "coupons" ? "Coupons" : "Wallet"}
+          </Box>
         </Typography>
       </Stack>
 
+      <Stack direction="row" spacing={1} mb={3}>
+        <Button
+          variant={activeTab === "coupons" ? "contained" : "outlined"}
+          onClick={() => setActiveTab("coupons")}
+        >
+          Coupons
+        </Button>
+        <Button
+          variant={activeTab === "wallet" ? "contained" : "outlined"}
+          onClick={() => setActiveTab("wallet")}
+        >
+          Wallet
+        </Button>
+      </Stack>
+
+      {activeTab === "wallet" ? (
+        <WalletSettingsPanel />
+      ) : (
+        <>
       {/* ================= Title + Actions ================= */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5" fontWeight="bold">Coupon Management</Typography>
@@ -151,12 +174,13 @@ const CouponTable = () => {
         </Table>
       </TableContainer>
 
-      {/* ================= Dialog Form ================= */}
       <CouponFormDialog
         open={dialogOpen}
         handleClose={() => setDialogOpen(false)}
         onSuccess={fetchCoupons}
       />
+        </>
+      )}
     </Box>
   );
 };

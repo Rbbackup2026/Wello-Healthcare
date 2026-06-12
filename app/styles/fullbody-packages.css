@@ -175,9 +175,14 @@
 }
 
 .fb-package-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 24px;
   background: transparent;
   padding: 0 0 14px;
+  flex-wrap: wrap;
 }
 
 .fb-package-topbar h1 {
@@ -188,15 +193,66 @@
   line-height: 1.18;
   font-weight: 700;
   letter-spacing: 0;
+  flex: 1 1 320px;
 }
 
 .fb-package-topbar h1 span {
   color: #07BEB8;
 }
 
+.fb-package-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+  flex: 0 1 auto;
+}
+
+.fb-package-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.fb-package-sort label {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fb-package-sort select {
+  height: 48px;
+  min-width: 168px;
+  border: 1px solid #b8d8dc;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0 36px 0 16px;
+  color: #334155;
+  font-size: 14px;
+  outline: 0;
+  cursor: pointer;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% + 2px),
+    calc(100% - 12px) calc(50% + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.fb-package-sort select:focus {
+  border-color: #18b4b4;
+  box-shadow: 0 0 0 2px rgba(24, 180, 180, 0.15);
+}
+
 .fb-package-search {
   position: relative;
-  margin: 0 2px;
+  margin: 0;
+  width: min(360px, 100%);
   max-width: 360px;
 }
 
@@ -224,6 +280,35 @@
   color: #6b7280;
   font-size: 17px;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .fb-package-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fb-package-controls {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fb-package-sort {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fb-package-sort select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .fb-package-search {
+    width: 100%;
+    max-width: none;
+  }
 }
 
 .fb-category-description {

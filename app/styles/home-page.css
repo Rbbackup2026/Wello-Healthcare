@@ -11,9 +11,14 @@
   background: #f8fdff;
 }
 
-.wello-sticky-header .wello-topbar,
-.wello-sticky-header .wello-nav-shell {
+.wello-sticky-header .wello-topbar {
   position: static !important;
+}
+
+.wello-sticky-header .wello-nav-shell {
+  position: relative !important;
+  top: 0 !important;
+  margin-top: 0;
 }
 
 .wello-sticky-header + * {

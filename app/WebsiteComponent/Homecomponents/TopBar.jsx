@@ -2,15 +2,13 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  FaHeadset,
   FaMapMarkerAlt,
   FaSearch,
   FaShoppingCart,
-  FaUser,
 } from "react-icons/fa";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "../../hooks/useAppRouter";
 import { useCart } from "../../Components/MainRoute/CartContext";
 import { useLocation } from "../../Components/MainRoute/LocationContext";
 import LocationDialog from "../AllDailogFroms/LocationDialog";
@@ -113,7 +111,7 @@ const topbarStyles = {
 };
 
 const TopBar = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const dropdownRef = useRef(null);
   const { cartItems } = useCart();
   const { locationLabel } = useLocation();
@@ -303,28 +301,16 @@ const TopBar = () => {
             )}
           </Link>
 
-          <button
-            type="button"
-            onClick={() => setLoginOpen(true)}
-            className="wello-header-btn"
-            style={topbarStyles.headerControl}
-          >
-            <FaUser />
-            <span>Login/Register</span>
-          </button>
+          <LoginProfileDropDown onOpenLogin={() => setLoginOpen(true)} variant="topbar" />
 
           <a
-            href="tel:7982100200"
-            className="wello-header-link"
+            href="tel:+918448158188"
+            className="wello-header-link wello-support-link"
             style={topbarStyles.headerControl}
           >
             <FaPhoneAlt />
             Support
           </a>
-
-          <div className="wello-mobile-profile">
-            <LoginProfileDropDown onOpenLogin={() => setLoginOpen(true)} />
-          </div>
         </div>
       </header>
 

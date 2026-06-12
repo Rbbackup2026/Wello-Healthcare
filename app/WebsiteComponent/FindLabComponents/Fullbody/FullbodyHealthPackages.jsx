@@ -150,6 +150,7 @@ const FullbodyHealthPackages = () => {
   const { addToCart } = useCart();
   const { location } = useLocation();
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [packages, setPackages] = useState([]);
   const [categoryBannerUrl, setCategoryBannerUrl] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
@@ -246,13 +247,33 @@ const FullbodyHealthPackages = () => {
     navigate("/cart_section");
   };
 
-  const filteredPackages = packages.filter((pkg) => {
-    const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return [pkg.name, pkg.category, pkg.itemType, pkg.description]
-      .filter(Boolean)
-      .some((value) => value.toString().toLowerCase().includes(query));
-  });
+  const filteredPackages = packages
+    .filter((pkg) => {
+      const query = search.trim().toLowerCase();
+      if (!query) return true;
+      return [pkg.name, pkg.category, pkg.itemType, pkg.description]
+        .filter(Boolean)
+        .some((value) => value.toString().toLowerCase().includes(query));
+    })
+    .sort((left, right) => {
+      const leftName = String(left.name || "").toLowerCase();
+      const rightName = String(right.name || "").toLowerCase();
+      const leftPrice = getPackagePrice(left);
+      const rightPrice = getPackagePrice(right);
+
+      switch (sortBy) {
+        case "name-asc":
+          return leftName.localeCompare(rightName);
+        case "name-desc":
+          return rightName.localeCompare(leftName);
+        case "price-asc":
+          return leftPrice - rightPrice;
+        case "price-desc":
+          return rightPrice - leftPrice;
+        default:
+          return 0;
+      }
+    });
 
   return (
     <>
@@ -274,20 +295,37 @@ const FullbodyHealthPackages = () => {
               </section>
             )}
 
-            {/* 1. Heading + Search */}
+            {/* 1. Heading + Search + Sort */}
             <div className="fb-package-topbar">
               <h1>
                 Full Body Health Checkup <span>in {cityName}</span>
               </h1>
-              <div className="fb-package-search">
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Find Your Test/Package/Scans"
-                  aria-label="Search full body health packages"
-                />
-                <FaSearch aria-hidden="true" />
+              <div className="fb-package-controls">
+                <div className="fb-package-sort">
+                  <label htmlFor="fb-sort-by">Sort by</label>
+                  <select
+                    id="fb-sort-by"
+                    value={sortBy}
+                    onChange={(event) => setSortBy(event.target.value)}
+                    aria-label="Sort packages"
+                  >
+                    <option value="default">Default</option>
+                    <option value="name-asc">A-Z</option>
+                    <option value="name-desc">Z-A</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                  </select>
+                </div>
+                <div className="fb-package-search">
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Find Your Test/Package/Scans"
+                    aria-label="Search full body health packages"
+                  />
+                  <FaSearch aria-hidden="true" />
+                </div>
               </div>
             </div>
 

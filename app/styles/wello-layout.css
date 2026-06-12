@@ -1,3 +1,22 @@
+/* Top route progress bar */
+.wello-route-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20000;
+  height: 3px;
+  pointer-events: none;
+  background: transparent;
+}
+
+.wello-route-loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #48c7c2 0%, #008a86 100%);
+  box-shadow: 0 0 10px rgba(0, 138, 134, 0.45);
+  transition: width 0.22s ease;
+}
+
 /* Utility Classes */
 .wello-container {
   max-width: 1320px;
@@ -175,8 +194,100 @@
   text-align: center;
 }
 
-.wello-mobile-profile {
-  display: none;
+.wello-user-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wello-user-trigger {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wello-user-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.wello-user-trigger-icon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.wello-user-trigger-label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wello-user-trigger-chevron {
+  flex-shrink: 0;
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.wello-user-trigger-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.wello-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  width: 220px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+}
+
+.wello-user-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 12px 18px;
+  border: 0;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wello-user-dropdown-item:hover {
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.wello-user-dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.wello-user-dropdown-item--signout {
+  color: #dc2626;
+}
+
+.wello-user-dropdown-item--signout:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.wello-user-trigger--mobile {
+  color: #0f766e;
+  border-color: #99f6e4;
+  background: #ffffff;
 }
 
 .wello-nav-shell {
@@ -186,10 +297,15 @@
   background: #f8fdff;
 }
 
+.wello-nav-shell.is-mega-open {
+  z-index: 120;
+}
+
 .wello-nav-inner {
+  position: relative;
   height: 70px;
   max-width: 740px;
-  margin: -1px auto 0;
+  margin: 0 auto;
   padding: 0 24px;
   display: flex;
   align-items: center;
@@ -222,6 +338,7 @@
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .wello-nav-primary {
@@ -229,68 +346,126 @@
   color: #009b96;
 }
 
-.wello-nav-group {
-  position: relative;
+.wello-nav-primary svg {
+  font-size: 11px;
+  transition: transform 0.2s ease;
 }
 
-.wello-menu {
+.wello-nav-primary svg.is-open {
+  transform: rotate(180deg);
+}
+
+.wello-nav-group {
+  position: static;
+}
+
+.wello-mega-panel {
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  max-width: 100vw;
+  transform: translateX(-50%);
+  top: 100%;
+  z-index: 130;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  padding-top: 8px;
+  background: transparent;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.wello-mega-panel::before {
+  content: "";
   position: absolute;
   left: 0;
-  top: 100%;
-  display: none;
-  min-width: 250px;
-  padding: 8px 0;
+  right: 0;
+  top: 0;
+  height: 8px;
+}
+
+.wello-mega-panel.is-open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wello-mega-menu {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  max-width: 1180px;
+  min-height: 340px;
+  margin: 0 auto;
   background: #ffffff;
-  border: 1px solid #eef2f7;
-  border-radius: 8px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
 }
 
-.wello-nav-group:hover > .wello-menu,
-.wello-sub-group:hover > .wello-flyout {
-  display: block;
-}
-
-.wello-menu-link {
-  width: 100%;
-  min-height: 42px;
-  padding: 0 16px;
+.wello-mega-sidebar {
   display: flex;
+  flex-direction: column;
+  background: #18b4b4;
+}
+
+.wello-mega-sidebar-item {
+  display: flex;
+  min-height: 54px;
   align-items: center;
   justify-content: space-between;
-  color: #475569;
+  gap: 12px;
+  padding: 0 20px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.wello-sub-group {
-  position: relative;
+.wello-mega-sidebar-item:hover,
+.wello-mega-sidebar-item.is-active {
+  background: #0f9494;
 }
 
-.wello-flyout {
-  position: absolute;
-  left: 100%;
-  top: 0;
-  display: none;
-  width: 480px;
-  padding: 16px;
-  margin-left: 4px;
+.wello-mega-sidebar-item svg {
+  flex-shrink: 0;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.wello-mega-content {
+  padding: 24px 28px;
   background: #ffffff;
-  border: 1px solid #eef2f7;
-  border-radius: 8px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
 }
 
-.wello-flyout-link {
-  display: inline-flex;
-  margin: 4px;
-  padding: 8px 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: #f8fafc;
-  color: #475569;
+.wello-mega-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 18px;
+}
+
+.wello-mega-link {
+  display: block;
+  padding: 6px 0;
+  color: #1f2937;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.45;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.wello-mega-link:hover {
+  color: #18b4b4;
+}
+
+.wello-mega-empty {
+  margin: 0;
+  padding: 24px 0;
+  color: #64748b;
+  font-size: 14px;
 }
 
 .wello-hero {
@@ -791,15 +966,13 @@
     font-size: 12px;
   }
 
-  .wello-menu {
-    min-width: 220px;
+  .wello-mega-menu {
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 
-  .wello-flyout {
-    left: 0;
-    top: 100%;
-    width: min(320px, calc(100vw - 24px));
-    margin-left: 0;
+  .wello-mega-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .wello-main-content {

@@ -21,8 +21,8 @@
     align-self: center !important;
   }
 
-  .wello-header-btn,
-  .wello-header-link {
+  .wello-header-btn:not(.wello-user-trigger),
+  .wello-header-link:not(.wello-support-link) {
     display: none;
   }
 
@@ -50,9 +50,13 @@
     padding-top: 100px !important;
   }
 
-  .wello-mobile-profile {
-    display: block !important;
+  .wello-user-menu {
     margin-left: auto !important;
+  }
+
+  .wello-user-trigger-label {
+    max-width: 110px;
+    font-size: 12px;
   }
 
   .wello-nav-shell {

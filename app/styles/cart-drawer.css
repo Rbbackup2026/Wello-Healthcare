@@ -10,12 +10,17 @@
 
 .wello-sticky-header .wello-nav-shell {
   position: relative !important;
+  top: 0 !important;
+  margin-top: 0;
   z-index: 30;
 }
 
-.wello-sticky-header .wello-menu,
-.wello-sticky-header .wello-flyout {
-  z-index: 40;
+.wello-sticky-header .wello-nav-shell.is-mega-open {
+  z-index: 120;
+}
+
+.wello-sticky-header .wello-mega-panel {
+  z-index: 130;
 }
 
 .wello-cart-panel.is-open {

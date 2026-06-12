@@ -1,16 +1,40 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import TopBar from "./TopBar";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import { Link } from "../../lib/routerCompat";
+import Link from "next/link";
+import AccountLayout from "./AccountLayout";
+
+const formatDate = (value) => {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getOrderYear = (order) => {
+  const source = order?.createdAt || order?.orderDate || order?.slotDate || order?.updatedAt;
+  if (!source) return null;
+  const year = new Date(source).getFullYear();
+  return Number.isNaN(year) ? null : year;
+};
+
+const getBookingId = (order) => {
+  if (order?.bookingId) return order.bookingId;
+  if (order?.orderId) return order.orderId;
+  const id = String(order?._id || "");
+  return id ? id.slice(-11).toUpperCase() : "N/A";
+};
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(String(new Date().getFullYear()));
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -33,8 +57,8 @@ const MyOrders = () => {
         const res = await axios.get(`http://localhost:3000/v1/api/orders/${userId}`);
         const ordersData = res.data.orders || res.data || [];
         setOrders(Array.isArray(ordersData) ? [...ordersData].reverse() : []);
-      } catch (err) {
-        console.error("Error fetching orders:", err);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
       } finally {
         setLoading(false);
       }
@@ -43,107 +67,120 @@ const MyOrders = () => {
     fetchOrders();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center text-xl font-bold text-teal-600">
-        Loading your booking history...
-      </div>
-    );
-  }
+  const availableYears = useMemo(() => {
+    const years = orders
+      .map(getOrderYear)
+      .filter(Boolean);
+    return [...new Set(years)].sort((a, b) => b - a);
+  }, [orders]);
+
+  useEffect(() => {
+    if (availableYears.length === 0) return;
+    if (!availableYears.includes(Number(selectedYear))) {
+      setSelectedYear(String(availableYears[0]));
+    }
+  }, [availableYears, selectedYear]);
+
+  const filteredOrders = useMemo(
+    () => orders.filter((order) => String(getOrderYear(order)) === selectedYear),
+    [orders, selectedYear]
+  );
 
   return (
-    <>
-      <div className="wello-sticky-header">
-        <TopBar />
-        <Navbar />
-      </div>
-      <div className="min-h-screen bg-[#F0F9FF] px-4 py-12">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="mb-8 border-l-4 border-teal-500 pl-4 text-3xl font-extrabold text-blue-900">
-            My Bookings
-          </h1>
+    <AccountLayout activePage="bookings">
+      <div className="bookings-panel">
+        <div className="bookings-panel-header">
+          <h1>My Bookings</h1>
+          <div className="bookings-year-filter">
+            <select
+              value={selectedYear}
+              onChange={(event) => setSelectedYear(event.target.value)}
+              aria-label="Filter bookings by year"
+            >
+              {availableYears.map((year) => (
+                <option key={year} value={String(year)}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-          {!user ? (
-            <div className="rounded-2xl bg-white p-10 text-center shadow-lg">
-              <p className="text-lg text-gray-600">Please log in to see your orders.</p>
+        <div className="bookings-panel-body">
+          {loading ? (
+            <div className="bookings-empty">Loading your bookings...</div>
+          ) : !user ? (
+            <div className="bookings-empty">
+              <p>Please log in to view your bookings.</p>
             </div>
-          ) : orders.length === 0 ? (
-            <div className="rounded-3xl border border-slate-100 bg-white p-12 text-center shadow-xl">
-              <div className="mb-4 text-6xl">List</div>
-              <h2 className="text-2xl font-bold text-gray-800">No bookings yet</h2>
-              <p className="mt-2 text-gray-500">
-                Your test bookings will appear here once you place them.
-              </p>
-              <Link
-                to="/"
-                className="mt-6 inline-block rounded-xl bg-[#25C0DC] px-8 py-3 font-bold text-white shadow-md transition-all hover:bg-[#1a96a8]"
-              >
+          ) : filteredOrders.length === 0 ? (
+            <div className="bookings-empty">
+              <h2>No bookings found</h2>
+              <p>Your test bookings will appear here once you place them.</p>
+              <Link href="/lab-tests" className="bookings-browse-btn">
                 Browse Tests
               </Link>
             </div>
           ) : (
-            <div className="grid gap-6">
-              {orders.map((order) => (
-                <div
-                  key={order._id}
-                  className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md transition-shadow hover:shadow-lg"
-                >
-                  <div className="p-6">
-                    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                      <div>
-                        <div className="mb-1 flex items-center gap-2">
-                          <span
-                            className={`h-3 w-3 rounded-full ${
-                              order.status === "Completed" ? "bg-green-500" : "bg-orange-400"
-                            }`}
-                          />
-                          <span className="text-sm font-bold uppercase tracking-tighter text-gray-700">
-                            {order.status || "Pending"}
-                          </span>
+            <div className="bookings-list">
+              {filteredOrders.map((order) => {
+                const orderDate = formatDate(order.createdAt || order.orderDate);
+                const collectionDate = formatDate(order.slotDate);
+                const price = order.totalAmount || order.amount || 0;
+
+                return (
+                  <article key={order._id} className="booking-card">
+                    <div className="booking-card-main">
+                      <h2 className="booking-card-name">{order.patientName || user?.name || "Patient"}</h2>
+
+                      <dl className="booking-card-details">
+                        <div>
+                          <dt>Booking ID</dt>
+                          <dd>{getBookingId(order)}</dd>
                         </div>
-                        <p className="font-mono text-xs text-gray-400">ID: {order._id}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-black text-teal-600">
-                          Rs. {order.totalAmount || order.amount}
-                        </p>
-                        <p className="text-xs text-gray-500">{order.slotDate}</p>
-                      </div>
-                    </div>
+                        <div>
+                          <dt>Order Status</dt>
+                          <dd>{order.status || "Pending"}</dd>
+                        </div>
+                        <div>
+                          <dt>Order Date</dt>
+                          <dd>{orderDate}</dd>
+                        </div>
+                        <div>
+                          <dt>Sample Collection Date</dt>
+                          <dd>{collectionDate}</dd>
+                        </div>
+                        <div>
+                          <dt>Order Price</dt>
+                          <dd>₹{Number(price).toLocaleString("en-IN")}</dd>
+                        </div>
+                      </dl>
 
-                    <div className="mt-4 border-t border-slate-50 pt-4">
-                      <h4 className="mb-2 text-sm font-bold text-gray-800">
-                        Patient: {order.patientName}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {order.items?.map((item, idx) => (
-                          <span
-                            key={idx}
-                            className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600"
-                          >
-                            {item.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-end">
                       <Link
-                        to={`/order-confirmation/${order._id}`}
-                        className="flex items-center gap-1 text-sm font-bold text-blue-500 hover:text-blue-700"
+                        href={`/order-confirmation/${order._id}`}
+                        className="booking-summary-btn"
                       >
-                        View Details {"->"}
+                        Booking Summary
                       </Link>
                     </div>
-                  </div>
-                </div>
-              ))}
+
+                    <Link
+                      href={`/order-confirmation/${order._id}`}
+                      className="booking-tracking-panel"
+                    >
+                      <span className="booking-tracking-icon" aria-hidden="true">
+                        📄
+                      </span>
+                      <span>Order Tracking</span>
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
-      <Footer />
-    </>
+    </AccountLayout>
   );
 };
 
