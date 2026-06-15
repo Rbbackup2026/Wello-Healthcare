@@ -21,8 +21,9 @@ import {
 } from '@mui/material';
 import { CloudUpload, Close } from '@mui/icons-material';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/api';
 
-const BASE_URL = 'http://localhost:3000/v1/api';
+const BASE_URL = API_BASE_URL;
 
 const LabFormDialog = ({ open, onClose, lab, onSave }) => {
   const [formData, setFormData] = useState({

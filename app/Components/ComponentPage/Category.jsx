@@ -44,16 +44,15 @@ import {
 import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
 import CategoryFormDialog from "../DailogForm/CategoryFormDialog";
+import { API_BASE_URL, toAssetUrl } from "../../utils/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const BASE_URL = "http://localhost:3000"; // ✅ /v1/api ke bina — images yahan serve hoti hain
 
 const DEFAULT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' fill='%23f0f0f0' rx='6'/%3E%3Ctext x='25' y='32' text-anchor='middle' font-size='22' fill='%23bbb'%3E%3F%3C/text%3E%3C/svg%3E";
 
 // ✅ Backend se aane wala imageUrl use karo, fallback mein iconimg se banao
 const getImageUrl = (item) => {
   if (item?.imageUrl) return item.imageUrl;
-  if (item?.iconimg) return `${BASE_URL}/uploads/category/${item.iconimg}`;
+  if (item?.iconimg) return toAssetUrl(`/uploads/category/${item.iconimg}`);
   return DEFAULT_IMAGE;
 };
  // Update with your actual backend URL
@@ -97,7 +96,7 @@ function Category() {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(`${BASE_URL}/v1/api/categories`);
+      const res = await axios.get(`${API_BASE_URL}/categories`);
       setCategories(res.data || []);
     } catch (err) {
       console.error("Error fetching categories:", err);
@@ -123,7 +122,7 @@ function Category() {
     );
 
     try {
-      await axios.put(`${BASE_URL}/v1/api/toggle-status/${id}`);
+      await axios.put(`${API_BASE_URL}/toggle-status/${id}`);
     } catch (err) {
       setCategories(originalCategories); // rollback on failure
       console.error("Error toggling status:", err);
@@ -147,7 +146,7 @@ function Category() {
 
     try {
       // Backend khud toggle karta hai — body bhejne ki zaroorat nahi
-      await axios.put(`${BASE_URL}/v1/api/toggle-showInHome/${id}`);
+      await axios.put(`${API_BASE_URL}/toggle-showInHome/${id}`);
     } catch (err) {
       setCategories(originalCategories); // rollback on failure
       console.error("Error toggling show home status:", err);
@@ -174,7 +173,7 @@ function Category() {
     );
 
     try {
-      await axios.put(`${BASE_URL}/v1/api/toggle-showInNavbar/${id}`);
+      await axios.put(`${API_BASE_URL}/toggle-showInNavbar/${id}`);
     } catch (toggleError) {
       try {
         const formData = new FormData();
@@ -198,7 +197,7 @@ function Category() {
             : JSON.stringify(category.faqs || category.faq || [])
         );
 
-        await axios.put(`${BASE_URL}/v1/api/put/${id}`, formData, {
+        await axios.put(`${API_BASE_URL}/put/${id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } catch (err) {
@@ -220,7 +219,7 @@ function Category() {
     if (!categoryToDelete) return;
     try {
       await axios.delete(
-        `${BASE_URL}/v1/api/delete/${categoryToDelete._id}`
+        `${API_BASE_URL}/delete/${categoryToDelete._id}`
       );
       setDeleteConfirmOpen(false);
       setCategoryToDelete(null);
@@ -413,7 +412,7 @@ function Category() {
                         <Avatar
                           src={
                             category.iconimg
-                              ? `${BASE_URL}${category.iconimg}`
+                              ? toAssetUrl(category.iconimg)
                               : DEFAULT_IMAGE
                           }
                           variant="rounded"
@@ -425,7 +424,7 @@ function Category() {
                             borderColor: "divider",
                           }}
                           onClick={() =>
-                            setSelectedImage(`${BASE_URL}${category.iconimg}`)
+                            setSelectedImage(toAssetUrl(category.iconimg))
                           }
                         />
                       </TableCell>
@@ -518,7 +517,7 @@ function Category() {
                               color="info"
                               onClick={() =>
                                 setSelectedImage(
-                                  `${BASE_URL}${category.iconimg}`
+                                  toAssetUrl(category.iconimg)
                                 )
                               }
                               title="View Image"
@@ -617,3 +616,4 @@ function Category() {
 }
 
 export default Category;
+

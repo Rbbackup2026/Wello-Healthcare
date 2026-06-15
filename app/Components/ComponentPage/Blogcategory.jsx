@@ -9,8 +9,9 @@ import {
 } from "@mui/material";
 import { FaCheck, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import BlogCategoryForm from "../DailogForm/BlogCategoryForm";
+import { API_BASE_URL } from "../../utils/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL; // 👈 apna backend URL
+const BASE_URL = API_BASE_URL;
 
 const BlogCategory = () => {
   const navigate = useNavigate();

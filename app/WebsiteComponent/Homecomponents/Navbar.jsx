@@ -9,9 +9,8 @@ import {
 import axios from "axios";
 import Link from "next/link";
 import { useLocation } from "../../Components/MainRoute/LocationContext";
+import { API_BASE_URL } from "../../utils/api";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/v1/api";
 const FULL_BODY_CATEGORY = {
   _id: "full-body-health-checkup-category",
   name: "Full Body Health Checkup",

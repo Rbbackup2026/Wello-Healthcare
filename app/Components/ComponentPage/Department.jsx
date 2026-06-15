@@ -25,6 +25,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
 import DepartmentFormDialog from "../DailogForm/DepartmentFormDialog";
+import { API_BASE_URL, toAssetUrl } from "../../utils/api";
 
 const Department = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const Department = () => {
 
   const fetchDepartments = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/v1/api/get-departments");
+      const res = await axios.get(`${API_BASE_URL}/get-departments`);
       setDepartments(res.data.departments || []);
     } catch (err) {
       console.error(err);
@@ -51,7 +52,7 @@ const Department = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this department?")) return;
     try {
-      await axios.delete(`http://localhost:3000/v1/api/delete-department/${id}`);
+      await axios.delete(`${API_BASE_URL}/delete-department/${id}`);
       fetchDepartments();
     } catch (err) {
       console.error(err);
@@ -60,7 +61,7 @@ const Department = () => {
 
   const handleStatusToggle = async (department) => {
     try {
-      await axios.put(`http://localhost:3000/v1/api/update-department/${department._id}`, {
+      await axios.put(`${API_BASE_URL}/update-department/${department._id}`, {
         ...department,
         status: !department.status,
       });
@@ -117,7 +118,7 @@ const Department = () => {
                 <TableCell>{d._id}</TableCell>
                 <TableCell>
                   <Avatar
-                    src={`http://localhost:3000${d.image}`}
+                    src={toAssetUrl(d.image)}
                     variant="square"
                   />
                 </TableCell>

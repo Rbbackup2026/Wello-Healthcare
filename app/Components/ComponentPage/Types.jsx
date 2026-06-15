@@ -28,9 +28,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CategoryFormDialog from "../DailogForm/CategoryFormDialog";
 import { useNavigate } from "../../lib/routerCompat";
+import { API_BASE_URL, API_ORIGIN } from "../../utils/api";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BASE_URL = API_BASE_URL;
 const defaultImage =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6' rx='8'/%3E%3Cpath d='M22 54l13-16 9 10 7-8 8 14H22z' fill='%23cbd5e1'/%3E%3Ccircle cx='30' cy='28' r='6' fill='%23cbd5e1'/%3E%3C/svg%3E";
 
@@ -162,7 +163,7 @@ const Types = () => {
   // Get image URL
   const getImageUrl = (imageName) => {
     if (!imageName) return defaultImage;
-    return `http://localhost:3000/uploads/types/${imageName}`;
+    return `${API_ORIGIN}/uploads/types/${imageName}`;
   };
 
   // Get status display text

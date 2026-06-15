@@ -7,8 +7,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useNavigate } from "../../lib/routerCompat";
 import { useCart } from "../../Components/MainRoute/CartContext";
 import axios from "axios";
-
-const BASE_URL = "http://localhost:3000";
+import { API_BASE_URL } from "../../utils/api";
 
 const CartNotificationPopup = ({ currentUserId }) => {
   const [notification, setNotification] = useState(null);
@@ -25,7 +24,7 @@ const CartNotificationPopup = ({ currentUserId }) => {
 
     try {
       const res = await axios.get(
-        `${BASE_URL}/v1/api/notifications/${currentUserId}?t=${Date.now()}`
+        `${API_BASE_URL}/notifications/${currentUserId}?t=${Date.now()}`
       );
 
       console.log("Notification response:", res.data);
@@ -71,7 +70,7 @@ const CartNotificationPopup = ({ currentUserId }) => {
     if (!notificationId) return;
 
     try {
-      await axios.patch(`${BASE_URL}/v1/api/notifications/${notificationId}/seen`);
+      await axios.patch(`${API_BASE_URL}/notifications/${notificationId}/seen`);
     } catch (err) {
       console.error("Failed to mark seen", err);
     }

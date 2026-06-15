@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/api';
 
 const useSortOrders = () => {
   const [sortOrders, setSortOrders] = useState([]);
@@ -10,7 +11,7 @@ const useSortOrders = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:3000/v1/api/categories');
+      const response = await axios.get(`${API_BASE_URL}/categories`);
       if (response.data && Array.isArray(response.data)) {
         const orders = response.data
           .map(category => category.sortOrder)

@@ -7,8 +7,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import axios from "axios";
-
-const API_BASE_URL = "http://localhost:3000";
+import { API_BASE_URL, API_ORIGIN } from "../../utils/api";
 
 const BannerFormDialog = ({ open, onClose, initialData, bannerCount, onSuccess }) => {
   const isEdit = Boolean(initialData);
@@ -38,12 +37,12 @@ const BannerFormDialog = ({ open, onClose, initialData, bannerCount, onSuccess }
         webPreview: initialData.webImage
           ? initialData.webImage.startsWith("http")
             ? initialData.webImage
-            : `${API_BASE_URL}${initialData.webImage}`
+            : `${API_ORIGIN}${initialData.webImage}`
           : "",
         appPreview: initialData.appImage
           ? initialData.appImage.startsWith("http")
             ? initialData.appImage
-            : `${API_BASE_URL}${initialData.appImage}`
+            : `${API_ORIGIN}${initialData.appImage}`
           : "",
       });
     } else {
@@ -103,8 +102,8 @@ const BannerFormDialog = ({ open, onClose, initialData, bannerCount, onSuccess }
       if (formData.appImgFile) data.append("appImage", formData.appImgFile);
 
       const url = isEdit
-        ? `${API_BASE_URL}/v1/api/banner/put/${initialData._id}`
-        : `${API_BASE_URL}/v1/api/banner/uploadhomebanner`;
+        ? `${API_BASE_URL}/banner/put/${initialData._id}`
+        : `${API_BASE_URL}/banner/uploadhomebanner`;
 
       const method = isEdit ? "put" : "post";
       await axios[method](url, data);

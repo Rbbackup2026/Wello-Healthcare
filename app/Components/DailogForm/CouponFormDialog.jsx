@@ -5,8 +5,9 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import AutorenewIcon from '@mui/icons-material/Autorenew'; // for generate icon
+import { API_BASE_URL } from "../../utils/api";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API = API_BASE_URL;
 
 const CouponFormDialog = ({ open, handleClose, onSuccess }) => {
   const [form, setForm] = useState({

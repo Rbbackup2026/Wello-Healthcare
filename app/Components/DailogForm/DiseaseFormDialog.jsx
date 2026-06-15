@@ -26,12 +26,13 @@ import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { API_BASE_URL, API_ORIGIN } from "../../utils/api";
 
 // =============================================
 // Constants — sirf yahan change karo
 // =============================================
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL; // API calls ke liye
-const BASE_URL = "http://localhost:3000";             // Images ke liye ✅
+
+const BASE_URL = API_ORIGIN;             // Images ke liye ✅
 
 // =============================================
 // Departments Hook

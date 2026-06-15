@@ -15,6 +15,7 @@ import LocationDialog from "../AllDailogFroms/LocationDialog";
 import LoginModal from "./LoginFolder/LoginModal";
 import LoginProfileDropDown from "./LoginFolder/LoginProfileDropDown";
 import { FaPhoneAlt } from "react-icons/fa";
+import { API_BASE_URL } from "../../utils/api";
 
 const topbarStyles = {
   header: {
@@ -127,8 +128,8 @@ const TopBar = () => {
     const fetchSearchData = async () => {
       try {
         const [productRes, blogRes] = await Promise.all([
-          axios.get("http://localhost:3000/v1/api/get_product"),
-          axios.get("http://localhost:3000/v1/api/blogget-active"),
+          axios.get(`${API_BASE_URL}/get_product`),
+          axios.get(`${API_BASE_URL}/blogget-active`),
         ]);
         const productItems = Array.isArray(productRes?.data)
           ? productRes.data

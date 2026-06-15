@@ -28,6 +28,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import useDepartments from "../Hooks/useDepartments";
 import useCategories from "../Hooks/useCategories";
 import useSortOrders from "../Hooks/useSortOrders";
+import { API_BASE_URL, toAssetUrl } from "../../utils/api";
 
 const ImageBox = styled(Box)(() => ({
   border: "1px solid #ccc",
@@ -44,8 +45,6 @@ const FullCoverAvatar = styled(Avatar)(() => ({
   height: "100%",
   objectFit: "cover",
 }));
-
-const BASE_URL = "http://localhost:3000";
 
 const createEmptyFaq = () => ({
   question: "",
@@ -219,7 +218,7 @@ const CategoryFormDialog = ({ open, handleClose, initialData, onSuccess }) => {
   const getImageUrl = (image) => {
     if (!image) return "https://via.placeholder.com/1000";
     if (typeof image === "string") {
-      return image.startsWith("http") ? image : `${BASE_URL}/uploads/${image}`;
+      return image.startsWith("http") ? image : toAssetUrl(`/uploads/${image}`);
     }
     return URL.createObjectURL(image);
   };
@@ -259,8 +258,8 @@ const CategoryFormDialog = ({ open, handleClose, initialData, onSuccess }) => {
       }
 
       const url = initialData
-        ? `${BASE_URL}/v1/api/put/${initialData._id}`
-        : `${BASE_URL}/v1/api/create-category`;
+        ? `${API_BASE_URL}/put/${initialData._id}`
+        : `${API_BASE_URL}/create-category`;
 
       const method = initialData ? "put" : "post";
 

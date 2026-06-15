@@ -12,8 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
+import { API_BASE_URL } from "../../utils/api";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API = API_BASE_URL;
 
 const DEFAULT_SETTINGS = {
   earnType: "percentage",

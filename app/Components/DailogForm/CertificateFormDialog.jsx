@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/api';
 
 const CertificateFormDialog = ({ open, onClose, certificate, onSave }) => {
   const [formData, setFormData] = useState({
@@ -105,7 +106,7 @@ const CertificateFormDialog = ({ open, onClose, certificate, onSave }) => {
 
       // POST API Call
       const response = await axios.post(
-        'http://localhost:3000/v1/api/certificate_upload',
+        `${API_BASE_URL}/certificate_upload`,
         submitData,
         {
           headers: {

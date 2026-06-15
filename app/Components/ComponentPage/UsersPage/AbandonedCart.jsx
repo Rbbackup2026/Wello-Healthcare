@@ -30,6 +30,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import { useNavigate } from "../../../lib/routerCompat";
 import axios from "axios";
+import { API_BASE_URL } from "../../../utils/api";
 import { toast } from "react-toastify";
 
 const ABANDONED_CARTS_STORAGE_KEY = "abandonedCartRecords";
@@ -170,7 +171,7 @@ const handleSendNotification = async () => {
   }
 
   try {
-    await axios.post("http://localhost:3000/v1/api/send-user-notification", {
+    await axios.post(`${API_BASE_URL}/send-user-notification`, {
       userId: userId,
       message: notifyMessage,
     });

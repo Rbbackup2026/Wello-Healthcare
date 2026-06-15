@@ -13,8 +13,9 @@ import {
 } from 'lucide-react';
 import CertificateFormDialog from "../DailogForm/CertificateFormDialog";
 import axios from 'axios';
+import { API_BASE_URL, API_ORIGIN } from '../../utils/api';
 
-const BASE_URL = 'http://localhost:3000/v1/api';
+const BASE_URL = API_BASE_URL;
 
 const Certificatetype = () => {
   const [certificates, setCertificates] = useState([]);
@@ -292,7 +293,7 @@ const Certificatetype = () => {
                         <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center border border-gray-300">
                           {certificate.imageUrl ? (
                             <img 
-                              src={`http://localhost:3000${certificate.imageUrl}`} 
+                              src={`${API_ORIGIN}${certificate.imageUrl}`} 
                               alt={certificate.name}
                               className="w-full h-full object-cover rounded"
                             />

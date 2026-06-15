@@ -1,8 +1,9 @@
 // Hooks/useDepartments.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/api';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BASE_URL = API_BASE_URL;
 
 const useDepartments = () => {
   const [departments, setDepartments] = useState([]);

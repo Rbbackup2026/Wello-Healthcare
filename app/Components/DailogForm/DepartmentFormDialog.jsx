@@ -18,6 +18,7 @@ import {
 import { styled } from "@mui/material/styles";
 import JoditEditor from "jodit-react";
 import axios from "axios";
+import { API_BASE_URL } from "../../utils/api";
 
 
 
@@ -82,7 +83,7 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
       if (formValues.image) formData.append("image", formValues.image);
 
       const res = await axios.post(
-        "http://localhost:3000/v1/api/create-department",
+        `${API_BASE_URL}/create-department`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

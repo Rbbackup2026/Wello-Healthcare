@@ -26,8 +26,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
 import ItemListingDialog from "../DailogForm/ItemListingDailog";
-
-const BASE_URL = "http://localhost:3000";
+import { API_BASE_URL } from "../../utils/api";
 
 const extractItems = (payload) => {
   if (Array.isArray(payload)) return payload;
@@ -71,7 +70,7 @@ function Items() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}/v1/api/get_product`);
+      const response = await axios.get(`${API_BASE_URL}/get_product`);
       const extractedItems = extractItems(response.data);
       setItems(extractedItems);
     } catch (error) {
@@ -92,7 +91,7 @@ function Items() {
 
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await axios.put(`${BASE_URL}/v1/api/put_status/${id}/toggle-status`, {
+      await axios.put(`${API_BASE_URL}/put_status/${id}/toggle-status`, {
         isActive: !currentStatus,
       });
       showSnackbar("Status updated successfully");
@@ -117,7 +116,7 @@ function Items() {
         )
       );
 
-      await axios.put(`${BASE_URL}/v1/api/items/${id}`, {
+      await axios.put(`${API_BASE_URL}/items/${id}`, {
         showFullBodyHealthCheckup: newStatus, // ✅ naam fix
       });
 
@@ -149,7 +148,7 @@ function Items() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     try {
-      await axios.delete(`${BASE_URL}/v1/api/delete_product/${id}`);
+      await axios.delete(`${API_BASE_URL}/delete_product/${id}`);
       showSnackbar("Item deleted successfully");
       fetchItems();
     } catch (error) {
@@ -164,7 +163,7 @@ function Items() {
     try {
       await Promise.all(
         selectionModel.map((id) =>
-          axios.delete(`${BASE_URL}/v1/api/delete_product/${id}`)
+          axios.delete(`${API_BASE_URL}/delete_product/${id}`)
         )
       );
       showSnackbar("Selected items deleted successfully");
@@ -192,7 +191,7 @@ function Items() {
     setCsvImporting(true);
     try {
       const response = await axios.post(
-        `${BASE_URL}/v1/api/products/bulk-import-csv`,
+        `${API_BASE_URL}/products/bulk-import-csv`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

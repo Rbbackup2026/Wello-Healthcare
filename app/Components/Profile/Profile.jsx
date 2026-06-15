@@ -15,6 +15,7 @@ import {
 import LogoutIcon from "@mui/icons-material/Logout";
 import axios from "axios";
 import { useNavigate } from "../../lib/routerCompat";
+import { toApiUrl } from "../../utils/api";
 
 export default function Profile({ setIsAuthenticated }) {
   const [openConfirm, setOpenConfirm] = React.useState(false);
@@ -60,7 +61,7 @@ export default function Profile({ setIsAuthenticated }) {
         // Try to call backend logout API
         try {
           await axios.post(
-            "http://localhost:3000/v1/api/logout",
+            toApiUrl("/logout"),
             {},
             {
               headers: {

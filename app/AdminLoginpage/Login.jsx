@@ -22,9 +22,9 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
 import { useNavigate } from "../lib/routerCompat";
+import { toApiUrl } from "../utils/api";
 
 function AdminLogin({ setIsAuthenticated }) {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -92,7 +92,7 @@ function AdminLogin({ setIsAuthenticated }) {
 
     try {
       const response = await axios.post(
-        `${apiBaseUrl}/v1/api/login`,
+        toApiUrl("/login"),
         { email: loginEmail, password: loginPassword },
         {
           headers: {
@@ -200,7 +200,7 @@ function AdminLogin({ setIsAuthenticated }) {
   const testAPI = async () => {
     try {
       console.log("🧪 Testing API connection...");
-      const response = await axios.get(`${apiBaseUrl}/v1/api/authuser`);
+      const response = await axios.get(toApiUrl("/authuser"));
       console.log("API Test Response:", response.data);
     } catch (error) {
       console.error("API Test Error:", error);

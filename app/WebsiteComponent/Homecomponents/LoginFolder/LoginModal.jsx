@@ -5,6 +5,7 @@ import {
   dispatchCustomerAuthChanged,
   getCustomerIdentity,
 } from "../../../utils/customerSession";
+import { API_BASE_URL } from "../../../utils/api";
 
 const LoginModal = ({ open, onClose }) => {
   const [email, setEmail] = useState("");
@@ -100,7 +101,7 @@ const LoginModal = ({ open, onClose }) => {
       setLoading(true);
       try {
         const res = await axios.post(
-          "http://localhost:3000/v1/api/request-otp",
+          `${API_BASE_URL}/request-otp`,
           { email }
         );
 
@@ -134,7 +135,7 @@ const LoginModal = ({ open, onClose }) => {
 
       try {
         const res = await axios.post(
-          "http://localhost:3000/v1/api/verify-otp",
+          `${API_BASE_URL}/verify-otp`,
           { email, otp }
         );
 
@@ -205,7 +206,7 @@ const LoginModal = ({ open, onClose }) => {
       setLoading(true);
       try {
         const res = await axios.post(
-          "http://localhost:3000/v1/api/update-profile",
+          `${API_BASE_URL}/update-profile`,
           {
             email,
             name,

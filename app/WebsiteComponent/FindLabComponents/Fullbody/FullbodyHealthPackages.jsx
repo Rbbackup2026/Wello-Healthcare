@@ -13,6 +13,7 @@ import Navbar from "../../Homecomponents/Navbar";
 import Footer from "../../Homecomponents/Footer";
 import { useCart } from "../../../Components/MainRoute/CartContext";
 import { useLocation } from "../../../Components/MainRoute/LocationContext";
+import { API_BASE_URL, API_ORIGIN } from "../../../utils/api";
 import { toast } from "react-toastify";
 
 const extractItems = (payload) => {
@@ -37,7 +38,6 @@ const getPackagePrice = (pkg) => Number(pkg.price || pkg.newPrice || 0);
 const getPackageMrp = (pkg) => Number(pkg.mrp || pkg.oldPrice || 0);
 const getPackageTestCount = (pkg) => pkg.testCount || pkg.tests || "Multiple";
 const FULL_BODY_CATEGORY_NAME = "Full Body Health Checkup";
-const API_ORIGIN = "http://localhost:3000";
 
 const getCategoryDescription = (category) =>
   category?.pagedescription ||
@@ -163,7 +163,7 @@ const FullbodyHealthPackages = () => {
     const fetchFullBodyPackages = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:3000/v1/api/get_product");
+        const res = await axios.get(`${API_BASE_URL}/get_product`);
         const allItems = extractItems(res.data);
         const filtered = allItems.filter((product) => {
           const matchesFullBody =
@@ -190,7 +190,7 @@ const FullbodyHealthPackages = () => {
   useEffect(() => {
     const fetchFullBodyCategory = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/v1/api/categories");
+        const res = await axios.get(`${API_BASE_URL}/categories`);
         const categoryData = Array.isArray(res.data) ? res.data : [];
         const fullBodyCategory = categoryData.find(
           (category) =>

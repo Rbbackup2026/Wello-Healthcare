@@ -8,6 +8,7 @@ import TopBar from "./TopBar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { replaceCityText } from "../../utils/locationText";
+import { API_BASE_URL } from "../../utils/api";
 
 // ⭐ MATERIAL UI IMPORTS
 import {
@@ -73,7 +74,7 @@ const ItemDetail = ({ id }) => {
       try {
         setLoading(true);
         // ✅ Direct single product API — description bhi aayegi
-        const res = await axios.get(`http://localhost:3000/v1/api/get_product/${id}`);
+        const res = await axios.get(`${API_BASE_URL}/get_product/${id}`);
         console.log("Fetched product details:", res.data.data); // Add this line
         setProduct(res.data.data);
       } catch (err) {

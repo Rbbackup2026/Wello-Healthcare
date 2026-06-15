@@ -18,8 +18,7 @@ import {
   processLocalWalletOrder,
 } from "../../utils/walletStorage";
 import { normalizeAddressList, readLocalAddresses } from "../../utils/savedAddressStorage";
-
-const BASE_URL = "http://localhost:3000";
+import { API_BASE_URL } from "../../utils/api";
 
 const BOOKING_STORAGE_KEY = "labBookingDetails";
 const PACKAGE_PEOPLE_STORAGE_KEY = "cartPackagePeople";
@@ -232,7 +231,7 @@ const CartPage = () => {
     let balance = getLocalWalletBalance(userId);
 
     try {
-      const settingsRes = await axios.get(`${BASE_URL}/v1/api/wallet/settings`);
+      const settingsRes = await axios.get(`${API_BASE_URL}/wallet/settings`);
       if (settingsRes.data?.settings) {
         settings = { ...DEFAULT_WALLET_SETTINGS, ...settingsRes.data.settings };
       }
@@ -241,7 +240,7 @@ const CartPage = () => {
     }
 
     try {
-      const balanceRes = await axios.get(`${BASE_URL}/v1/api/wallet/balance/${userId}`);
+      const balanceRes = await axios.get(`${API_BASE_URL}/wallet/balance/${userId}`);
       balance = Number(balanceRes.data?.balance ?? balance);
       if (balanceRes.data?.settings) {
         settings = { ...DEFAULT_WALLET_SETTINGS, ...balanceRes.data.settings };
@@ -280,13 +279,13 @@ const CartPage = () => {
         const userId = parsedUser._id || parsedUser.id;
         fetchWalletForUser(userId);
         axios
-          .get(`${BASE_URL}/v1/api/all`)
+          .get(`${API_BASE_URL}/all`)
           .then((res) => setAvailableCoupons((res.data.coupons || []).filter((coupon) => coupon.active)))
           .catch(() => setAvailableCoupons([]));
 
         if (previousIdentity !== currentIdentity) {
           axios
-            .get(`${BASE_URL}/v1/api/get-saved-addresses/${userId}`)
+            .get(`${API_BASE_URL}/get-saved-addresses/${userId}`)
             .then((res) => {
               const apiAddresses = normalizeAddressList(res.data.savedAddresses || []);
               setSavedAddresses(
@@ -653,13 +652,13 @@ const CartPage = () => {
         totalAmount: totalToPay,
         appliedCoupon: appliedCoupon?.code || "",
       };
-      const res = await axios.post(`${BASE_URL}/v1/api/create-order`, orderPayload);
+      const res = await axios.post(`${API_BASE_URL}/create-order`, orderPayload);
       const orderId = res.data?.order?._id;
       const userId = user._id || user.id;
       let earnedCoins = coinsToEarn;
 
       try {
-        const walletRes = await axios.post(`${BASE_URL}/v1/api/wallet/process-order`, {
+        const walletRes = await axios.post(`${API_BASE_URL}/wallet/process-order`, {
           userId,
           orderId,
           orderSubtotal: subtotal,

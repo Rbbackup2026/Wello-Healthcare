@@ -16,8 +16,9 @@ import {
   DialogActions,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { API_BASE_URL } from "../../utils/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BASE_URL = API_BASE_URL;
 
 const ImageBox = styled(Box)(() => ({
   border: "1px solid #ccc",

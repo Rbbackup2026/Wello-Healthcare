@@ -3,9 +3,7 @@ import {
   FaArrowRight,
   FaChevronRight,
 } from "react-icons/fa";
-
-// â”€â”€ Apna backend URL yahan set karo â”€â”€
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+import { API_BASE_URL, API_ORIGIN } from "../../utils/api";
 
 // â”€â”€ Quick Actions (static) â”€â”€
 const quickActions = [
@@ -80,7 +78,7 @@ const HeroBannerSlider = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res  = await fetch(`${API_BASE}/v1/api/banner/getall?display=home&status=Active`);
+        const res  = await fetch(`${API_BASE_URL}/banner/getall?display=home&status=Active`);
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           const apiBanners = data.sort((a, b) => a.sortId - b.sortId);
@@ -135,7 +133,7 @@ const HeroBannerSlider = () => {
               <img
                 src={slides[displayed].webImage?.startsWith("http")
                   ? slides[displayed].webImage
-                  : `${API_BASE}${slides[displayed].webImage}`}
+                  : `${API_ORIGIN}${slides[displayed].webImage}`}
                 alt={`banner-${displayed + 1}`}
                 decoding="async"
                 fetchPriority={displayed === 0 ? "high" : "auto"}

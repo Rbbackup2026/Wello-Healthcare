@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "../lib/routerCompat";
 import axios from "axios";
+import { toApiUrl } from "../utils/api";
 
 function Forgot() {
   const [email, setEmail] = useState("");
@@ -24,7 +25,7 @@ function Forgot() {
     }
 
     try {
-      const response = await axios.post("http://localhost:9000/v1/api/forgot-password", {
+      const response = await axios.post(toApiUrl("/forgot-password"), {
         email,
       });
 

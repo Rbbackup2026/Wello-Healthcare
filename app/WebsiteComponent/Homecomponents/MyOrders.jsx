@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import AccountLayout from "./AccountLayout";
+import { API_BASE_URL } from "../../utils/api";
 
 const formatDate = (value) => {
   if (!value) return "N/A";
@@ -54,7 +55,7 @@ const MyOrders = () => {
 
       try {
         const userId = parsedUser._id || parsedUser.id;
-        const res = await axios.get(`http://localhost:3000/v1/api/orders/${userId}`);
+        const res = await axios.get(`${API_BASE_URL}/orders/${userId}`);
         const ordersData = res.data.orders || res.data || [];
         setOrders(Array.isArray(ordersData) ? [...ordersData].reverse() : []);
       } catch (error) {

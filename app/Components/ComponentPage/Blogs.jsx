@@ -24,9 +24,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
 import BlogFormDialog from "../DailogForm/BlogFormDialog";
-import { toAssetUrl } from "../../utils/api";
+import { API_BASE_URL, toAssetUrl } from "../../utils/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = API_BASE_URL;
 
 const normalizeFormValue = (value) => {
   if (value === null || value === undefined || value === "null") return "";

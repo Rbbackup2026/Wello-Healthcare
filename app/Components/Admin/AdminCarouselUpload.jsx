@@ -13,8 +13,7 @@ import axios from "axios";
 
 import BannerFormDialog from "./BannerFormDialog";
 import { buildBannerImageUrl } from "../../utils/bannerImageUtils";
-
-const API_BASE = "http://localhost:3000";
+import { API_BASE_URL } from "../../utils/api";
 
 const AdminCarouselUpload = () => {
   const [banners, setBanners] = useState([]);
@@ -35,7 +34,7 @@ const AdminCarouselUpload = () => {
     try {
       setLoading(true);
       // ✅ Sahi route
-      const res = await axios.get(`${API_BASE}/v1/api/banner/getall`);
+      const res = await axios.get(`${API_BASE_URL}/banner/getall`);
       setBanners(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch banners error:", err);
@@ -47,7 +46,7 @@ const AdminCarouselUpload = () => {
   const handleStatusToggle = async (banner) => {
     try {
       // ✅ Sahi route + sahi field name
-      await axios.put(`${API_BASE}/v1/api/banner/put/${banner._id}`, {
+      await axios.put(`${API_BASE_URL}/banner/put/${banner._id}`, {
         status: banner.status === "Active" ? "Inactive" : "Active",
       });
       fetchBanners();
@@ -60,7 +59,7 @@ const AdminCarouselUpload = () => {
     if (!window.confirm("Are you sure you want to delete this banner?")) return;
     try {
       // ✅ Sahi route
-      await axios.delete(`${API_BASE}/v1/api/banner/delete/${banner._id}`);
+      await axios.delete(`${API_BASE_URL}/banner/delete/${banner._id}`);
       fetchBanners();
     } catch (err) {
       console.error("Delete error", err);

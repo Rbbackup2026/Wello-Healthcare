@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+import { API_ORIGIN } from "./api";
 
 export const MOBILE_BANNER_BREAKPOINT = 768;
 
@@ -14,7 +14,7 @@ export const buildBannerImageUrl = (imagePath) => {
   }
 
   const sanitizedPath = normalizedPath.replace(/^\.?\//, "");
-  return `${API_BASE_URL}/${sanitizedPath}`;
+  return `${API_ORIGIN}/${sanitizedPath}`;
 };
 
 export const getBannerImageByViewport = (banner, isMobile) => {

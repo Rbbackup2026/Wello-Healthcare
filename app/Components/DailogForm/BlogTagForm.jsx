@@ -17,6 +17,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import { API_BASE_URL } from "../../utils/api";
 
 const BlogTagForm = ({ open, onClose, onSubmit, initialData = null }) => {
   const [formData, setFormData] = useState({
@@ -78,8 +79,8 @@ const BlogTagForm = ({ open, onClose, onSubmit, initialData = null }) => {
 
     try {
       const apiUrl = initialData
-        ? `http://localhost:3000/v1/api/tagput/${initialData._id}`
-        : "http://localhost:3000/v1/api/blogtagpost";
+        ? `${API_BASE_URL}/tagput/${initialData._id}`
+        : `${API_BASE_URL}/blogtagpost`;
 
       const method = initialData ? "PUT" : "POST";
 

@@ -24,8 +24,9 @@ import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
 import CouponFormDialog from "../DailogForm/CouponFormDialog";
 import WalletSettingsPanel from "../DailogForm/WalletSettingsPanel";
+import { API_BASE_URL } from "../../utils/api";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API = API_BASE_URL;
 
 const CouponTable = () => {
   const navigate = useNavigate();

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import { API_ORIGIN } from "../../utils/api";
 
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = API_ORIGIN;
 
 const TYPE_CONFIG = {
   static: { color: "#3b82f6", bg: "#3b82f611", label: "Static" },

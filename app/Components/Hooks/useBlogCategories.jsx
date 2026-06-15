@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/api';
 
 const useBlogCategories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Get auth token
   const getAuthToken = () => {

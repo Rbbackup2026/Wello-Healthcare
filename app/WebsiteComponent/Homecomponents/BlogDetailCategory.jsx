@@ -3,17 +3,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "../../lib/routerCompat";
 import axios from "axios";
+import { toApiUrl, toAssetUrl } from "../../utils/api";
 
 const BlogDetailCategory = () => {
   const { id } = useParams();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const BASE_URL = "http://localhost:3000/";
-
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}v1/api/blogget-active/${id}`);
+      const res = await axios.get(toApiUrl(`/blogget-active/${id}`));
       setBlogs(res.data);
     } catch (err) {
       console.log(err);
@@ -40,7 +39,7 @@ const BlogDetailCategory = () => {
         {blogs.map((b) => (
           <div key={b._id} className="shadow p-4 rounded-lg">
             <img
-              src={BASE_URL + b.image}
+              src={toAssetUrl(b.image)}
               alt={b.title}
               className="w-full h-48 object-cover rounded"
             />

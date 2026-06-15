@@ -12,8 +12,8 @@ import {
   readLocalAddresses,
   writeLocalAddresses,
 } from "../../utils/savedAddressStorage";
+import { API_BASE_URL } from "../../utils/api";
 
-const BASE_URL = "http://localhost:3000";
 const EMPTY_FORM = {
   type: "HOME",
   houseNo: "",
@@ -43,7 +43,7 @@ const SavedAddresses = () => {
       writeLocalAddresses(userId, nextAddresses);
 
       try {
-        await axios.post(`${BASE_URL}/v1/api/save-saved-addresses`, {
+        await axios.post(`${API_BASE_URL}/save-saved-addresses`, {
           userId,
           savedAddresses: nextAddresses,
         });
@@ -64,7 +64,7 @@ const SavedAddresses = () => {
     setLoading(true);
 
     try {
-      const res = await axios.get(`${BASE_URL}/v1/api/get-saved-addresses/${userId}`);
+      const res = await axios.get(`${API_BASE_URL}/get-saved-addresses/${userId}`);
       const apiAddresses = normalizeAddressList(res.data.savedAddresses || []);
       if (apiAddresses.length > 0) {
         setAddresses(apiAddresses);

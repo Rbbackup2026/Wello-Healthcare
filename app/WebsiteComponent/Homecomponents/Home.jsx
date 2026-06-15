@@ -17,15 +17,12 @@ import TopBar from "./TopBar";
 import Navbar from "./Navbar";
 import HealthcareHero from "./HealthcareHero";
 import { useLocation } from "../../Components/MainRoute/LocationContext";
-import { toAssetUrl } from "../../utils/api";
+import { API_BASE_URL, toAssetUrl } from "../../utils/api";
 import { extractApiArray, normalizeCityName } from "../../utils/cityApi";
 import axios from "axios"; // Import axios
 
 const teal = "#12bdb8";
 
-// Define API_BASE_URL for consistency
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const BASE_URL = "http://localhost:3000"; // For images
 const FULL_BODY_CATEGORY_TITLE = "Full Body Health Checkup";
 
 const packageCards = [
@@ -372,7 +369,7 @@ const scrollCategories = (direction) => {
   // Helper to get image URL, similar to Diseases.jsx
   const getImageUrl = (item) => {
     if (item?.imageUrl) return item.imageUrl;
-    if (item?.iconimg) return `${BASE_URL}/uploads/diseases/${item.iconimg}`;
+    if (item?.iconimg) return toAssetUrl(`/uploads/diseases/${item.iconimg}`);
     return "/images/fullbody-icon.png"; // A generic placeholder if no image
   };
 

@@ -67,6 +67,7 @@ import {
   getBannerImageByViewport,
   MOBILE_BANNER_BREAKPOINT,
 } from "../../utils/bannerImageUtils";
+import { API_BASE_URL } from "../../utils/api";
 
 const Carousel = ({ showQuickActions = false }) => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const Carousel = ({ showQuickActions = false }) => {
     setLoading(true);
     setLoadError("");
 
-    fetch("http://localhost:3000/v1/api/getbanner")
+    fetch(`${API_BASE_URL}/getbanner`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {

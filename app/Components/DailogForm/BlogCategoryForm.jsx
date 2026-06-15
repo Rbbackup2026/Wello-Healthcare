@@ -16,6 +16,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import { API_BASE_URL } from "../../utils/api";
 
 const BlogCategoryForm = ({ open, onClose, onSubmit, initialData = null }) => {
   const [formData, setFormData] = useState({
@@ -98,8 +99,8 @@ const BlogCategoryForm = ({ open, onClose, onSubmit, initialData = null }) => {
       }
 
       const apiUrl = initialData 
-        ? `http://localhost:3000/v1/api/categoryblogput/${initialData._id}`
-        : 'http://localhost:3000/v1/api/categoryblog/post';
+        ? `${API_BASE_URL}/categoryblogput/${initialData._id}`
+        : `${API_BASE_URL}/categoryblog/post`;
 
       const method = initialData ? 'PUT' : 'POST';
 
