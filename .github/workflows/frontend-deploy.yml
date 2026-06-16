@@ -23,7 +23,6 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 30m
-
           script: |
             set -e
 
@@ -40,11 +39,6 @@ jobs:
             nvm use 20
 
             export NODE_OPTIONS="--max-old-space-size=2048"
-
-            npm cache clean --force
-
-            rm -rf node_modules
-            rm -rf .next
 
             npm install --legacy-peer-deps --no-audit --no-fund
 
