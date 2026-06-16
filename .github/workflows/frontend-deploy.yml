@@ -22,6 +22,8 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
+          timeout: 60s
+          command_timeout: 30m
 
           script: |
             set -e
@@ -33,11 +35,11 @@ jobs:
             git fetch origin
             git reset --hard origin/main
 
+            export NODE_OPTIONS="--max-old-space-size=2048"
+
             npm cache clean --force
 
-            npm install --legacy-peer-deps
-
-            export NODE_OPTIONS="--max-old-space-size=2048"
+            npm install --legacy-peer-deps --no-audit --no-fund
 
             npm run build
 
