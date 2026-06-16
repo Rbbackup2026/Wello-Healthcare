@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import { API_ORIGIN } from "../../utils/api";
+import { API_ORIGIN } from "../../../utils/api";
+
 
 const BACKEND_URL = API_ORIGIN;
 
+//css
 const TYPE_CONFIG = {
   static: { color: "#3b82f6", bg: "#3b82f611", label: "Static" },
   product: { color: "#10b981", bg: "#10b98111", label: "Product" },
