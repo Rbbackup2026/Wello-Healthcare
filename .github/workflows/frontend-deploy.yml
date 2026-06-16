@@ -16,7 +16,6 @@ jobs:
     steps:
       - name: Deploy Frontend
         uses: appleboy/ssh-action@v1.0.3
-
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -35,9 +34,17 @@ jobs:
             git fetch origin
             git reset --hard origin/main
 
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+            nvm use 20
+
             export NODE_OPTIONS="--max-old-space-size=2048"
 
             npm cache clean --force
+
+            rm -rf node_modules
+            rm -rf .next
 
             npm install --legacy-peer-deps --no-audit --no-fund
 
