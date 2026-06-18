@@ -294,7 +294,7 @@
   position: sticky;
   top: 80px;
   z-index: 90;
-  background: #f8fdff;
+  background: transparent;
 }
 
 .wello-nav-shell.is-mega-open {
@@ -471,7 +471,7 @@
 .wello-hero {
   position: relative;
   overflow: hidden;
-  background: #f8fdff;
+  background: #ffffff;
   contain: paint;
 }
 

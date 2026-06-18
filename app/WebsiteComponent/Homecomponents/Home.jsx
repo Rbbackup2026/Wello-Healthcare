@@ -6,8 +6,6 @@ import {
   FaChevronRight,
   FaChevronDown,
   FaChevronUp,
-  FaMicroscope,
-  FaRegClock,
   FaStar,
   FaMapMarkerAlt,
   FaPhoneAlt,
@@ -136,16 +134,26 @@ const ProductCard = memo(({ id, title, price }) => (
       <span>50% OFF</span>
     </div>
     <div className="pdf-product-body">
-      <div>
-        <p><FaMicroscope /> <strong>62 Parameters</strong></p>
-        <small>Included</small>
+      <div className="pdf-product-meta">
+        <div>
+          <p>
+            <img src="/images/Parameter.png" alt="" className="pdf-product-feature-icon" aria-hidden="true" />
+            <strong>62 Parameters</strong>
+          </p>
+          <small>Included</small>
+        </div>
+        <div>
+          <p>
+            <img src="/images/Report.png" alt="" className="pdf-product-feature-icon" aria-hidden="true" />
+            <strong>Reports in</strong>
+          </p>
+          <small>12 hours</small>
+        </div>
       </div>
-      <a href={id ? `/product/${id}` : "/lab-tests"}>+ Know More</a>
-      <div>
-        <p><FaRegClock /> <strong>Reports in</strong></p>
-        <small>12 hours</small>
+      <div className="pdf-product-actions">
+        <a className="pdf-know-more" href={id ? `/product/${id}` : "/lab-tests"}>+ Know More</a>
+        <a className="pdf-add-cart" href={id ? `/product/${id}` : "/lab-tests"}>Add to Cart</a>
       </div>
-      <a className="pdf-add-cart" href={id ? `/product/${id}` : "/lab-tests"}>Add to Cart</a>
     </div>
   </article>
 ));
@@ -192,11 +200,21 @@ const SliderShell = memo(({ children, className = "", contentRef, onPrev, onNext
 SliderShell.displayName = "SliderShell";
 
 const ProductSection = memo(({ title, showBg = false, products = packageCards }) => {
+  const productSliderRef = useRef(null);
   const titleParts = title.match(/^(.*?)(\sin\s.+)$/);
   const restTitle = titleParts ? titleParts[1] : title;
   const highlightedTitle = titleParts ? titleParts[2].trim() : "";
   const testsTitleParts = !highlightedTitle ? restTitle.match(/^(.*\s)(Tests)$/) : null;
-  
+
+  const scrollProductCards = (direction) => {
+    if (!productSliderRef.current) return;
+    const viewportWidth = productSliderRef.current.clientWidth;
+    productSliderRef.current.scrollBy({
+      left: direction === "left" ? -viewportWidth : viewportWidth,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <section className={`pdf-section pdf-product-section ${showBg ? "pdf-fullbody-section" : ""}`}>
       <div className="pdf-section-inner">
@@ -215,7 +233,11 @@ const ProductSection = memo(({ title, showBg = false, products = packageCards })
           ))}
         </div>
       )}
-      <SliderShell>
+      <SliderShell
+        contentRef={productSliderRef}
+        onPrev={() => scrollProductCards("left")}
+        onNext={() => scrollProductCards("right")}
+      >
         <div className="pdf-product-grid">
           {products.length === 0 ? (
             <p className="text-center py-4 text-gray-500 col-span-full">No packages available.</p>

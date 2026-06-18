@@ -3,8 +3,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FaMicroscope,
-  FaRegClock,
   FaSearch,
 } from "react-icons/fa";
 import { Link, useNavigate } from "../../../lib/routerCompat";
@@ -364,34 +362,46 @@ const FullbodyHealthPackages = () => {
 
                       {/* Body */}
                       <div className="pdf-product-body">
-                        <div>
-                          <p>
-                            <FaMicroscope />
-                            <strong>{getPackageTestCount(pkg)} Parameters</strong>
-                          </p>
-                          <small>Included</small>
+                        <div className="pdf-product-meta">
+                          <div>
+                            <p>
+                              <img
+                                src="/images/Parameter.png"
+                                alt=""
+                                className="pdf-product-feature-icon"
+                                aria-hidden="true"
+                              />
+                              <strong>{getPackageTestCount(pkg)} Parameters</strong>
+                            </p>
+                            <small>Included</small>
+                          </div>
+
+                          <div>
+                            <p>
+                              <img
+                                src="/images/Report.png"
+                                alt=""
+                                className="pdf-product-feature-icon"
+                                aria-hidden="true"
+                              />
+                              <strong>Reports in</strong>
+                            </p>
+                            <small>12 hours</small>
+                          </div>
                         </div>
 
-                        <Link
-                          to={`/product/${pkg._id}`}
-                        >
-                          + Know More
-                        </Link>
+                        <div className="pdf-product-actions">
+                          <Link className="pdf-know-more" to={`/product/${pkg._id}`}>
+                            + Know More
+                          </Link>
 
-                        <div>
-                          <p>
-                            <FaRegClock />
-                            <strong>Reports in</strong>
-                          </p>
-                          <small>12 hours</small>
+                          <button
+                            className="pdf-add-cart"
+                            onClick={() => handleAddToCart(pkg, idx)}
+                          >
+                            Add to Cart
+                          </button>
                         </div>
-
-                        <button
-                          className="pdf-add-cart"
-                          onClick={() => handleAddToCart(pkg, idx)}
-                        >
-                          Add to Cart
-                        </button>
                       </div>
 
                     </article>
