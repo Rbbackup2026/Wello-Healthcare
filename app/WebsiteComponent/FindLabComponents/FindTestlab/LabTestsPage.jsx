@@ -13,9 +13,13 @@ import {
   extractApiArray,
   mapApiProduct,
 } from "../../../utils/cityApi";
-import { toApiUrl } from "../../../utils/api";
+import { API_BASE_URL, toApiUrl } from "../../../utils/api";
+import { excludeRadiologyProducts } from "../../../utils/productVisibility";
+import axios from "axios";
 import { toast } from "react-toastify";
+import DisplayPageBanner from "../../Shared/DisplayPageBanner";
 import { FaMicroscope, FaRegClock } from "react-icons/fa";
+import { withProductDemographics } from "../../../utils/cartItemMeta";
 
 const FULL_BODY_CATEGORY_NAME = "Full Body Health Checkup";
 
@@ -178,23 +182,53 @@ const LabTestsPage = () => {
       setError("");
 
       try {
-        let response = await fetchCityCollection("get_product", location.city);
+        const [productResponse, departmentResponse] = await Promise.all([
+          fetchCityCollection("get_product", location.city),
+          axios.get(`${API_BASE_URL}/get-departments`),
+        ]);
         if (!isMounted) return;
 
-        let cityMatchedProducts = filterProductsByCity(response, location.city) || [];
+        const departmentRecords =
+          departmentResponse.data?.departments ||
+          extractApiArray(departmentResponse.data) ||
+          [];
 
-        if (cityMatchedProducts.length === 0 && response.length > 0) {
-          cityMatchedProducts = response;
+        let cityMatchedProducts =
+          filterProductsByCity(productResponse, location.city) || [];
+
+        if (cityMatchedProducts.length === 0 && productResponse.length > 0) {
+          cityMatchedProducts = productResponse;
         }
 
-        setProducts(Array.isArray(cityMatchedProducts) ? cityMatchedProducts.map(mapApiProduct) : []);
+        const nonRadiologyProducts = excludeRadiologyProducts(
+          cityMatchedProducts,
+          departmentRecords
+        );
+
+        setProducts(
+          Array.isArray(nonRadiologyProducts)
+            ? nonRadiologyProducts.map((product, index) =>
+                mapApiProduct(product, index, location.city)
+              )
+            : []
+        );
       } catch (fetchError) {
         console.error("Failed to fetch city products:", fetchError);
         if (isMounted) {
           try {
-            const fallbackResponse = await fetch(toApiUrl("/get_product"));
+            const [fallbackResponse, departmentResponse] = await Promise.all([
+              fetch(toApiUrl("/get_product")),
+              axios.get(`${API_BASE_URL}/get-departments`),
+            ]);
             const fallbackPayload = await fallbackResponse.json();
-            const fallbackProducts = extractApiArray(fallbackPayload).map(mapApiProduct);
+            const departmentRecords =
+              departmentResponse.data?.departments ||
+              extractApiArray(departmentResponse.data) ||
+              [];
+            const fallbackProducts = excludeRadiologyProducts(
+              extractApiArray(fallbackPayload),
+              departmentRecords
+            ).map((product, index) => mapApiProduct(product, index, location.city));
             setProducts(fallbackProducts);
             setError("");
           } catch (fallbackError) {
@@ -273,15 +307,20 @@ const LabTestsPage = () => {
     });
   }, [products, searchTerm, selectedCategory, selectedTest]);
 
-  const buildCartItem = (product) => ({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    category: product.category,
-    tests: product.tests,
-    type: product.type,
-    city: location.city,
-  });
+  const buildCartItem = (product) =>
+    withProductDemographics(
+      {
+        id: product.id,
+        _id: product.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        tests: product.tests,
+        type: product.type,
+        city: location.city,
+      },
+      product.raw || product
+    );
 
   const handleAddToCart = (product) => {
     addToCart(buildCartItem(product));
@@ -308,6 +347,15 @@ const LabTestsPage = () => {
         <TopBar />
         <Navbar />
       </div>
+
+      <DisplayPageBanner
+        display="pathology"
+        city={location?.city}
+        categoryName={selectedCategory}
+        excludeCategoryNames={[FULL_BODY_CATEGORY_NAME]}
+        className="lab-tests-page-banner"
+      />
+
       <div className="flex p-6 gap-6 lab-tests-layout">
         {/* Sidebar */}
         <div className="w-64 space-y-6 lab-tests-sidebar">

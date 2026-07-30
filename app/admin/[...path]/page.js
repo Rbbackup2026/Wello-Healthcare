@@ -27,6 +27,7 @@ const ADMIN_PAGE_MAP = {
   pagelist: dynamicAdminPage(() => import("../../Components/ComponentPage/PageList/Pages")),
   bannerlist: dynamicAdminPage(() => import("../../Components/Admin/AdminCarouselUpload")),
   customer_list: dynamicAdminPage(() => import("../../Components/ComponentPage/UsersPage/UserList")),
+  lead_list: dynamicAdminPage(() => import("../../Components/ComponentPage/UsersPage/LeadList")),
   newsletter_list: dynamicAdminPage(() => import("../../Components/ComponentPage/UsersPage/Newsletter")),
   help_list: dynamicAdminPage(() => import("../../Components/ComponentPage/UsersPage/ContactInquiry")),
   get_tuch_inq_list: dynamicAdminPage(() => import("../../Components/ComponentPage/UsersPage/GetInTouchInquiry")),
@@ -48,6 +49,13 @@ const ADMIN_PAGE_MAP = {
   manage_states: dynamicAdminPage(() => import("../../Components/ComponentPage/MannageLocations/StateManagement")),
   manage_cities: dynamicAdminPage(() => import("../../Components/ComponentPage/MannageLocations/CityManagement")),
   manage_countries: dynamicAdminPage(() => import("../../Components/ComponentPage/MannageLocations/CountryManagement")),
+  order_list: dynamicAdminPage(() => import("../../Components/ComponentPage/CartPage/OrderMaster")),
+  order_report: dynamicAdminPage(() => import("../../Components/ComponentPage/CartPage/OrderReport")),
+  manage_faqs: dynamicAdminPage(() => import("../../Components/ComponentPage/WebsiteCms/ManageFaqs")),
+  manage_testimonials: dynamicAdminPage(() => import("../../Components/ComponentPage/WebsiteCms/ManageTestimonials")),
+  manage_areas: dynamicAdminPage(() => import("../../Components/ComponentPage/MannageLocations/ManageAreas")),
+  manage_pincodes: dynamicAdminPage(() => import("../../Components/ComponentPage/MannageLocations/ManagePincodes")),
+  service_availability: dynamicAdminPage(() => import("../../Components/ComponentPage/MannageLocations/ServiceAvailability")),
 };
 
 export default function AdminPage({ params }) {

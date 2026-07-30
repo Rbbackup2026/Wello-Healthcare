@@ -16,7 +16,6 @@ import {
   Stack,
   Paper,
   Button,
-  Dialog,
   Switch,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -157,19 +156,12 @@ const Department = () => {
         />
       </Paper>
 
-      <Dialog
+      <DepartmentFormDialog
         open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DepartmentFormDialog
-          open={openDialog}
-          handleClose={() => setOpenDialog(false)}
-          initialData={editData}
-          fetchDepartments={fetchDepartments}
-        />
-      </Dialog>
+        handleClose={() => setOpenDialog(false)}
+        initialData={editData}
+        fetchDepartments={fetchDepartments}
+      />
     </Box>
   );
 };

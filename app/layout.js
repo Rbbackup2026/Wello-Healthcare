@@ -24,8 +24,14 @@ import './styles/lab-detail.css';
 import './styles/wello-responsive.css';
 import './styles/home-page.css';
 import './styles/fullbody-packages.css';
+import './styles/schedule-scan.css';
 import './styles/blog-detail.css';
 import './styles/my-account.css';
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

@@ -131,6 +131,19 @@ export const PAGE_SEO = {
     path: "/download-report",
     keywords: [...DEFAULT_KEYWORDS, "download lab report", "test report online"],
   },
+  scheduleScan: {
+    title: "Schedule Radiology Scan & Imaging Tests",
+    description:
+      "Book MRI, CT scan, ultrasound, X-ray and radiology imaging tests online in your city with Wello Healthcare.",
+    path: "/schedule-scan",
+    keywords: [
+      ...DEFAULT_KEYWORDS,
+      "schedule radiology scan",
+      "MRI booking",
+      "CT scan booking",
+      "imaging tests",
+    ],
+  },
   helpFeedback: {
     title: "Help & Feedback",
     description:

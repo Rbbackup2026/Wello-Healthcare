@@ -13,6 +13,7 @@ import {
   FormControl,
   FormControlLabel,
   Switch,
+  Checkbox,
   Chip,
   OutlinedInput,
   Box,
@@ -29,6 +30,7 @@ import "react-quill/dist/quill.snow.css";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { API_BASE_URL, toAssetUrl } from "../../utils/api";
+import { METRO_CITIES } from "../../utils/cityApi";
 
 // Custom Hooks Import
 import useCategories from "../Hooks/useCategories";
@@ -97,6 +99,107 @@ const normalizeFaqs = (faqs) => {
   return [];
 };
 
+const createEmptyPriceGroup = () => ({
+  id: `group-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  cities: [],
+  price: "",
+  mrp: "",
+  schedulePrice: "",
+  priceValidUntil: "",
+});
+
+const cityPricingToGroups = (cityPricing = []) => {
+  const groups = [];
+
+  cityPricing.forEach((entry) => {
+    if (!entry?.city) return;
+
+    const validUntilValue = entry.priceValidUntil
+      ? String(entry.priceValidUntil).slice(0, 10)
+      : "";
+    const signature = `${entry.price ?? ""}|${entry.mrp ?? ""}|${validUntilValue}`;
+    const existingGroup = groups.find((group) => group.signature === signature);
+
+    if (existingGroup) {
+      existingGroup.cities.push(entry.city);
+      return;
+    }
+
+    groups.push({
+      id: createEmptyPriceGroup().id,
+      signature,
+      cities: [entry.city],
+      price: entry.price ?? "",
+      mrp: entry.mrp ?? "",
+      schedulePrice: entry.schedulePrice ?? "",
+      priceValidUntil: validUntilValue,
+    });
+  });
+
+  return groups;
+};
+
+const groupsToCityPricing = (priceGroups = []) =>
+  priceGroups.flatMap((group) =>
+    group.cities.map((city) => {
+      const mrp = Number(group.mrp);
+      const offerPrice =
+        group.price !== "" && group.price !== null && group.price !== undefined
+          ? Number(group.price)
+          : 0;
+      return {
+        city,
+        price: Number.isFinite(offerPrice) && offerPrice > 0 ? offerPrice : 0,
+        mrp,
+        schedulePrice:
+          group.schedulePrice !== "" ? Number(group.schedulePrice) : undefined,
+        priceValidUntil:
+          offerPrice > 0 && group.priceValidUntil
+            ? group.priceValidUntil
+            : null,
+      };
+    })
+  );
+
+const getAssignedCities = (priceGroups = []) =>
+  priceGroups.flatMap((group) => group.cities);
+
+const getAvailableCitiesForGroup = (groupId, allSelectedCities, groups) => {
+  const takenByOtherGroups = groups
+    .filter((group) => group.id !== groupId)
+    .flatMap((group) => group.cities);
+
+  return allSelectedCities.filter((city) => !takenByOtherGroups.includes(city));
+};
+
+const normalizeCityPricing = (cityPricing, fallback = {}) => {
+  if (Array.isArray(cityPricing) && cityPricing.length > 0) {
+    return cityPricing.map((entry) => ({
+      city: entry?.city || "",
+      price: entry?.price ?? "",
+      mrp: entry?.mrp ?? "",
+      schedulePrice: entry?.schedulePrice ?? "",
+      priceValidUntil: entry?.priceValidUntil
+        ? String(entry.priceValidUntil).slice(0, 10)
+        : "",
+    }));
+  }
+
+  if (fallback.city) {
+    return [{
+      city: fallback.city,
+      price: fallback.price ?? "",
+      mrp: fallback.mrp ?? "",
+      schedulePrice: fallback.schedulePrice ?? "",
+      priceValidUntil: fallback.priceValidUntil
+        ? String(fallback.priceValidUntil).slice(0, 10)
+        : "",
+    }];
+  }
+
+  return [];
+};
+
 function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
   const { categories, loading: categoriesLoading } = useCategories();
   const { keyFeatures, loading: featuresLoading } = useKeyFeatures();
@@ -115,8 +218,8 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
     category: "",
     reportingTime: "",
     specimen: "",
-    fromAge: 0,
-    toAge: 0,
+    fromAge: "",
+    toAge: "",
     gender: "Both",
     showIn: "",
     showPopularPackage: "No",
@@ -125,11 +228,6 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
     showHomeBanner: false,
     status: true,
 
-    // Pricing & Location Fields
-    city: "",
-    price: "",
-    mrp: "",
-    schedulePrice: "",
     startDate: "",
     endDate: "",
     certificate: "",
@@ -138,6 +236,9 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
     // ✅ Product Description
     description: "",
     faqs: [createEmptyFaq()],
+
+    // Cart upsell — other tests shown as recommended when this item is in cart
+    recommendedTests: [],
 
     // Meta Fields
     metaTitle: "",
@@ -148,8 +249,12 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
 
   const [iconImg, setIconImg] = useState(null);
   const [previewImg, setPreviewImg] = useState(null);
+  const [selectedCities, setSelectedCities] = useState([]);
+  const [priceGroups, setPriceGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [productOptions, setProductOptions] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
 
   const activeLabs = getActiveLabs();
 
@@ -179,8 +284,14 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
         category: initialData.category?._id || initialData.category || "",
         reportingTime: initialData.reportingTime || "",
         specimen: initialData.specimen || "",
-        fromAge: initialData.fromAge || 0,
-        toAge: initialData.toAge || 0,
+        fromAge:
+          initialData.fromAge && Number(initialData.fromAge) > 0
+            ? initialData.fromAge
+            : "",
+        toAge:
+          initialData.toAge && Number(initialData.toAge) > 0
+            ? initialData.toAge
+            : "",
         gender: initialData.gender || "Both",
         showIn: initialData.showIn || "",
         showPopularPackage: initialData.showPopularPackage || "No",
@@ -190,11 +301,6 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
         showHomeBanner: initialData.showHomeBanner || false,
         status: initialData.status ?? true,
 
-        // Pricing & Location
-        city: initialData.city || "",
-        price: initialData.price || "",
-        mrp: initialData.mrp || "",
-        schedulePrice: initialData.schedulePrice || "",
         startDate: initialData.startDate || "",
         endDate: initialData.endDate || "",
         certificate:
@@ -207,6 +313,9 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
           const parsedFaqs = normalizeFaqs(initialData.faqs);
           return parsedFaqs.length > 0 ? parsedFaqs : [createEmptyFaq()];
         })(),
+        recommendedTests: Array.isArray(initialData.recommendedTests)
+          ? initialData.recommendedTests.map((item) => item._id || item)
+          : [],
 
         // Meta
         metaTitle: initialData.metaTitle || "",
@@ -214,6 +323,18 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
         metaDescription: initialData.metaDescription || "",
         metaSchema: initialData.metaSchema || "",
       });
+
+      const normalizedPricing = normalizeCityPricing(initialData.cityPricing, {
+        city: initialData.city,
+        price: initialData.price,
+        mrp: initialData.mrp,
+        schedulePrice: initialData.schedulePrice,
+        priceValidUntil: initialData.priceValidUntil,
+      });
+      const groupedPricing = cityPricingToGroups(normalizedPricing);
+
+      setSelectedCities(normalizedPricing.map((entry) => entry.city).filter(Boolean));
+      setPriceGroups(groupedPricing);
 
       if (initialData.iconImg) {
         setPreviewImg(toAssetUrl(`/uploads/${initialData.iconImg}`));
@@ -226,6 +347,99 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
     }
   }, [initialData, open]);
 
+  // Load products for Recommended Tests picker
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+    const loadProducts = async () => {
+      setProductsLoading(true);
+      try {
+        const response = await axios.get(`${BASE_URL}/get_product`);
+        const list = Array.isArray(response.data?.data)
+          ? response.data.data
+          : Array.isArray(response.data)
+            ? response.data
+            : [];
+        if (!cancelled) {
+          setProductOptions(
+            list
+              .filter((item) => item?.status !== false && item?.isActive !== false)
+              .map((item) => {
+                const departmentIds = Array.isArray(item.department)
+                  ? item.department
+                      .map((dept) => String(dept?._id || dept || ""))
+                      .filter(Boolean)
+                  : item.department
+                    ? [String(item.department._id || item.department)]
+                    : [];
+
+                return {
+                  _id: item._id,
+                  name: item.name || "Unnamed",
+                  itemType: item.itemType || "",
+                  departmentIds,
+                };
+              })
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load products for recommended tests", err);
+        if (!cancelled) setProductOptions([]);
+      } finally {
+        if (!cancelled) setProductsLoading(false);
+      }
+    };
+
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  // Keep recommended picks only for selected departments
+  useEffect(() => {
+    const selectedDeptIds = (formData.department || []).map(String);
+    if (selectedDeptIds.length === 0) {
+      if (formData.recommendedTests?.length) {
+        setFormData((prev) => ({ ...prev, recommendedTests: [] }));
+      }
+      return;
+    }
+
+    if (!productOptions.length || !formData.recommendedTests?.length) return;
+
+    const allowedIds = new Set(
+      productOptions
+        .filter((item) =>
+          (item.departmentIds || []).some((deptId) =>
+            selectedDeptIds.includes(String(deptId))
+          )
+        )
+        .map((item) => String(item._id))
+    );
+
+    const nextRecommended = formData.recommendedTests.filter((id) =>
+      allowedIds.has(String(id))
+    );
+
+    if (nextRecommended.length !== formData.recommendedTests.length) {
+      setFormData((prev) => ({
+        ...prev,
+        recommendedTests: nextRecommended,
+      }));
+    }
+  }, [formData.department, formData.recommendedTests, productOptions]);
+
+  const recommendedProductOptions = productOptions.filter((item) => {
+    if (item._id === (initialData?._id || "")) return false;
+    const selectedDeptIds = (formData.department || []).map(String);
+    if (selectedDeptIds.length === 0) return false;
+    return (item.departmentIds || []).some((deptId) =>
+      selectedDeptIds.includes(String(deptId))
+    );
+  });
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -237,8 +451,8 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
       category: "",
       reportingTime: "",
       specimen: "",
-      fromAge: 0,
-      toAge: 0,
+      fromAge: "",
+      toAge: "",
       gender: "Both",
       showIn: "",
       showPopularPackage: "No",
@@ -246,16 +460,13 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
       showInHome: false,
       showHomeBanner: false,
       status: true,
-      city: "",
-      price: "",
-      mrp: "",
-      schedulePrice: "",
       startDate: "",
       endDate: "",
       certificate: "",
       lab: "",
       description: "",   // ✅ reset
       faqs: [createEmptyFaq()],
+      recommendedTests: [],
       metaTitle: "",
       metaKeywords: "",
       metaDescription: "",
@@ -263,8 +474,107 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
     });
     setPreviewImg(null);
     setIconImg(null);
+    setSelectedCities([]);
+    setPriceGroups([]);
     setError("");
   };
+
+  const toggleSelectedCity = (cityName) => {
+    const isSelected = selectedCities.includes(cityName);
+
+    if (isSelected) {
+      setSelectedCities((prev) => prev.filter((city) => city !== cityName));
+      setPriceGroups((prev) =>
+        prev.map((group) => ({
+          ...group,
+          cities: group.cities.filter((city) => city !== cityName),
+        }))
+      );
+      return;
+    }
+
+    setSelectedCities((prev) => [...prev, cityName]);
+    setPriceGroups((prev) => (prev.length === 0 ? [createEmptyPriceGroup()] : prev));
+  };
+
+  const addPriceGroup = () => {
+    setPriceGroups((prev) => [...prev, createEmptyPriceGroup()]);
+  };
+
+  const removePriceGroup = (groupId) => {
+    setPriceGroups((prev) => prev.filter((group) => group.id !== groupId));
+  };
+
+  const updatePriceGroup = (groupId, field, value) => {
+    setPriceGroups((prev) =>
+      prev.map((group) =>
+        group.id === groupId ? { ...group, [field]: value } : group
+      )
+    );
+  };
+
+  const patchPriceGroup = (groupId, patch) => {
+    setPriceGroups((prev) =>
+      prev.map((group) =>
+        group.id === groupId ? { ...group, ...patch } : group
+      )
+    );
+  };
+
+  const toggleGroupCity = (groupId, cityName) => {
+    setPriceGroups((prev) =>
+      prev.map((group) => {
+        if (group.id === groupId) {
+          const hasCity = group.cities.includes(cityName);
+          return {
+            ...group,
+            cities: hasCity
+              ? group.cities.filter((city) => city !== cityName)
+              : [...group.cities, cityName],
+          };
+        }
+
+        return group;
+      })
+    );
+  };
+
+  const selectAllCitiesInGroup = (groupId) => {
+    const availableCities = getAvailableCitiesForGroup(
+      groupId,
+      selectedCities,
+      priceGroups
+    );
+
+    setPriceGroups((prev) =>
+      prev.map((group) =>
+        group.id === groupId ? { ...group, cities: availableCities } : group
+      )
+    );
+  };
+
+  const clearGroupCities = (groupId) => {
+    setPriceGroups((prev) =>
+      prev.map((group) =>
+        group.id === groupId ? { ...group, cities: [] } : group
+      )
+    );
+  };
+
+  const selectAllMetroCities = () => {
+    setSelectedCities([...METRO_CITIES]);
+    setPriceGroups((prev) => (prev.length === 0 ? [createEmptyPriceGroup()] : prev));
+  };
+
+  const clearAllSelectedCities = () => {
+    setSelectedCities([]);
+    setPriceGroups([]);
+  };
+
+  const assignedCities = getAssignedCities(priceGroups);
+  const unassignedCities = selectedCities.filter(
+    (city) => !assignedCities.includes(city)
+  );
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -317,12 +627,47 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
       setError("Item name is required");
       return false;
     }
-    if (!formData.city.trim()) {
-      setError("City is required");
+    if (selectedCities.length === 0) {
+      setError("Select at least one city");
       return false;
     }
-    if (!formData.price || formData.price <= 0) {
-      setError("Valid price is required");
+    if (priceGroups.length === 0) {
+      setError("Add at least one price group");
+      return false;
+    }
+    if (unassignedCities.length > 0) {
+      setError(`Assign price groups for: ${unassignedCities.join(", ")}`);
+      return false;
+    }
+    const invalidGroup = priceGroups.find((group) => {
+      if (group.cities.length === 0) return true;
+      if (!group.mrp || Number(group.mrp) <= 0) return true;
+      const hasOffer =
+        group.price !== "" &&
+        group.price !== null &&
+        Number(group.price) > 0;
+      if (hasOffer && Number(group.price) >= Number(group.mrp)) return true;
+      if (hasOffer && !group.priceValidUntil) return true;
+      return false;
+    });
+    if (invalidGroup) {
+      if (!invalidGroup.mrp || Number(invalidGroup.mrp) <= 0) {
+        setError("Each price group needs a valid MRP (mandatory)");
+      } else if (
+        invalidGroup.price !== "" &&
+        Number(invalidGroup.price) > 0 &&
+        Number(invalidGroup.price) >= Number(invalidGroup.mrp)
+      ) {
+        setError("Offer Price must be less than MRP");
+      } else if (
+        invalidGroup.price !== "" &&
+        Number(invalidGroup.price) > 0 &&
+        !invalidGroup.priceValidUntil
+      ) {
+        setError("Select Price Valid Until date when Offer Price is set");
+      } else {
+        setError("Each price group must have at least one city and a valid MRP");
+      }
       return false;
     }
     if (!formData.metaTitle.trim()) {
@@ -337,6 +682,24 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
       setError("Meta description is required");
       return false;
     }
+
+    const fromAgeNum =
+      formData.fromAge === "" || formData.fromAge === null
+        ? 0
+        : Number(formData.fromAge);
+    const toAgeNum =
+      formData.toAge === "" || formData.toAge === null
+        ? 0
+        : Number(formData.toAge);
+    if (
+      fromAgeNum > 0 &&
+      toAgeNum > 0 &&
+      fromAgeNum > toAgeNum
+    ) {
+      setError("From Age cannot be greater than To Age");
+      return false;
+    }
+
     return true;
   };
 
@@ -355,9 +718,27 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
         }))
         .filter((faq) => faq.question || faq.answer);
 
+      const normalizedCityPricing = groupsToCityPricing(priceGroups);
+
       const normalizedFormData = {
         ...formData,
         faqs: cleanedFaqs,
+        cityPricing: normalizedCityPricing,
+        city: normalizedCityPricing.map((entry) => entry.city).join(", "),
+        price: normalizedCityPricing[0]?.price || 0,
+        mrp: normalizedCityPricing[0]?.mrp ?? "",
+        schedulePrice: normalizedCityPricing[0]?.schedulePrice ?? "",
+        priceValidUntil: normalizedCityPricing[0]?.priceValidUntil || "",
+        // blank age → 0 = no restriction (valid for everyone)
+        fromAge:
+          formData.fromAge === "" || formData.fromAge === null
+            ? 0
+            : Number(formData.fromAge) || 0,
+        toAge:
+          formData.toAge === "" || formData.toAge === null
+            ? 0
+            : Number(formData.toAge) || 0,
+        gender: formData.gender || "Both",
       };
 
       Object.keys(normalizedFormData).forEach((key) => {
@@ -682,41 +1063,52 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
             )}
           </Box>
 
-          {/* Age & Gender */}
-          <Stack direction="row" spacing={2}>
-            <TextField
-              label="From Age"
-              type="number"
-              name="fromAge"
-              value={formData.fromAge}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              inputProps={{ min: 0, max: 100 }}
-            />
-            <TextField
-              label="To Age"
-              type="number"
-              name="toAge"
-              value={formData.toAge}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              inputProps={{ min: 0, max: 100 }}
-            />
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Gender</InputLabel>
-              <Select
-                name="gender"
-                value={formData.gender}
+          {/* Age & Gender — blank age = valid for everyone */}
+          <Stack spacing={1}>
+            <Typography variant="caption" color="textSecondary">
+              Leave From/To Age blank to allow all ages. Fill ages only when this
+              test is limited (validated at checkout with patient DOB). Gender
+              &quot;Both&quot; = all genders.
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="From Age"
+                type="number"
+                name="fromAge"
+                value={formData.fromAge}
                 onChange={handleChange}
-                label="Gender"
-              >
-                <MenuItem value="Both">Both</MenuItem>
-                <MenuItem value="Male">Male</MenuItem>
-                <MenuItem value="Female">Female</MenuItem>
-              </Select>
-            </FormControl>
+                fullWidth
+                variant="outlined"
+                placeholder="All ages"
+                helperText="Blank = no min age"
+                inputProps={{ min: 0, max: 100 }}
+              />
+              <TextField
+                label="To Age"
+                type="number"
+                name="toAge"
+                value={formData.toAge}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                placeholder="All ages"
+                helperText="Blank = no max age"
+                inputProps={{ min: 0, max: 100 }}
+              />
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Gender</InputLabel>
+                <Select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  label="Gender"
+                >
+                  <MenuItem value="Both">Both (All genders)</MenuItem>
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
           </Stack>
 
           {/* Show In */}
@@ -761,62 +1153,257 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
           {/* Pricing & Location */}
           <Divider>
             <Typography variant="subtitle2" color="primary">
-              Pricing & Location
+              Cities & Pricing
             </Typography>
           </Divider>
 
-          <TextField
-            label="City *"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            fullWidth
-            required
-            variant="outlined"
-            placeholder="Enter city name"
-            error={!formData.city.trim()}
-            helperText={!formData.city.trim() ? "City is required" : ""}
-          />
+          <Box sx={{ border: "1px solid #e0e0e0", borderRadius: 2, p: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Step 1: Select Cities *
+            </Typography>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
+              <Typography variant="caption" color="textSecondary">
+                Select the cities where this item will be available.
+              </Typography>
+              <Stack direction="row" spacing={1}>
+                <Button size="small" variant="text" onClick={selectAllMetroCities}>
+                  Select All Cities
+                </Button>
+                {selectedCities.length > 0 && (
+                  <Button size="small" variant="text" color="error" onClick={clearAllSelectedCities}>
+                    Clear All
+                  </Button>
+                )}
+              </Stack>
+            </Stack>
 
-          <Stack direction="row" spacing={2}>
-            <TextField
-              label="Price *"
-              name="price"
-              type="number"
-              value={formData.price}
-              onChange={handleChange}
-              fullWidth
-              required
-              variant="outlined"
-              inputProps={{ min: 0, step: "0.01" }}
-              error={!formData.price || formData.price <= 0}
-              helperText={
-                !formData.price || formData.price <= 0
-                  ? "Valid price is required"
-                  : ""
-              }
-            />
-            <TextField
-              label="MRP"
-              name="mrp"
-              type="number"
-              value={formData.mrp}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              inputProps={{ min: 0, step: "0.01" }}
-            />
-            <TextField
-              label="Schedule Price"
-              name="schedulePrice"
-              type="number"
-              value={formData.schedulePrice}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              inputProps={{ min: 0, step: "0.01" }}
-            />
-          </Stack>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+              {METRO_CITIES.map((cityName) => (
+                <FormControlLabel
+                  key={cityName}
+                  control={
+                    <Switch
+                      checked={selectedCities.includes(cityName)}
+                      onChange={() => toggleSelectedCity(cityName)}
+                    />
+                  }
+                  label={cityName}
+                />
+              ))}
+            </Box>
+
+            {selectedCities.length === 0 ? (
+              <Alert severity="warning">Select at least one city.</Alert>
+            ) : (
+              <>
+                <Divider sx={{ my: 2 }} />
+
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 2 }}
+                >
+                  <Box>
+                    <Typography variant="subtitle2">
+                      Step 2: Price Groups
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      MRP is mandatory. Offer Price + Valid Until date are optional.
+                      If Offer Price is empty/expired, website shows MRP only.
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AddCircleOutlineIcon />}
+                    onClick={addPriceGroup}
+                  >
+                    Add Price Group
+                  </Button>
+                </Stack>
+
+                {unassignedCities.length > 0 && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Assign these cities to a price group:{" "}
+                    <strong>{unassignedCities.join(", ")}</strong>
+                  </Alert>
+                )}
+
+                <Stack spacing={2}>
+                  {priceGroups.map((group, index) => {
+                    const availableCities = getAvailableCitiesForGroup(
+                      group.id,
+                      selectedCities,
+                      priceGroups
+                    );
+                    const allSelectedInGroup =
+                      availableCities.length > 0 &&
+                      availableCities.every((city) => group.cities.includes(city));
+
+                    return (
+                    <Box
+                      key={group.id}
+                      sx={{
+                        border: "1px solid #ececec",
+                        borderRadius: 2,
+                        p: 2,
+                        bgcolor: "#fafafa",
+                      }}
+                    >
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{ mb: 1.5 }}
+                      >
+                        <Typography variant="subtitle2">
+                          Price Group {index + 1}
+                        </Typography>
+                        {priceGroups.length > 1 && (
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => removePriceGroup(group.id)}
+                          >
+                            <DeleteOutlineIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{ mb: 1 }}
+                      >
+                        <Typography variant="caption" color="textSecondary">
+                          Select cities for this group
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="text"
+                            onClick={() => selectAllCitiesInGroup(group.id)}
+                            disabled={availableCities.length === 0 || allSelectedInGroup}
+                          >
+                            Select All
+                          </Button>
+                          {group.cities.length > 0 && (
+                            <Button
+                              size="small"
+                              variant="text"
+                              color="error"
+                              onClick={() => clearGroupCities(group.id)}
+                            >
+                              Clear
+                            </Button>
+                          )}
+                        </Stack>
+                      </Stack>
+
+                      {availableCities.length === 0 ? (
+                        <Typography variant="caption" color="textSecondary" sx={{ mb: 2, display: "block" }}>
+                          No cities available for this group — all cities are assigned to other groups.
+                        </Typography>
+                      ) : (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+                          {availableCities.map((cityName) => {
+                            const isChecked = group.cities.includes(cityName);
+
+                            return (
+                              <FormControlLabel
+                                key={`${group.id}-${cityName}`}
+                                control={
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onChange={() => toggleGroupCity(group.id, cityName)}
+                                  />
+                                }
+                                label={cityName}
+                              />
+                            );
+                          })}
+                        </Box>
+                      )}
+
+                      {group.cities.length > 0 && (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 2 }}>
+                          {group.cities.map((cityName) => (
+                            <Chip key={cityName} label={cityName} size="small" color="primary" variant="outlined" />
+                          ))}
+                        </Box>
+                      )}
+
+                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                        <TextField
+                          label="MRP *"
+                          type="number"
+                          value={group.mrp}
+                          onChange={(e) =>
+                            updatePriceGroup(group.id, "mrp", e.target.value)
+                          }
+                          fullWidth
+                          required
+                          helperText="Always shown / mandatory"
+                          inputProps={{ min: 0, step: "0.01" }}
+                        />
+                        <TextField
+                          label="Offer Price"
+                          type="number"
+                          value={group.price}
+                          onChange={(e) => {
+                            const nextPrice = e.target.value;
+                            const patch = { price: nextPrice };
+                            if (!nextPrice || Number(nextPrice) <= 0) {
+                              patch.priceValidUntil = "";
+                            }
+                            patchPriceGroup(group.id, patch);
+                          }}
+                          fullWidth
+                          helperText="Optional discount price"
+                          inputProps={{ min: 0, step: "0.01" }}
+                        />
+                        <TextField
+                          label="Price Valid Until *"
+                          type="date"
+                          value={group.priceValidUntil || ""}
+                          onChange={(e) =>
+                            updatePriceGroup(
+                              group.id,
+                              "priceValidUntil",
+                              e.target.value
+                            )
+                          }
+                          fullWidth
+                          disabled={
+                            !group.price || Number(group.price) <= 0
+                          }
+                          InputLabelProps={{ shrink: true }}
+                          helperText={
+                            group.price && Number(group.price) > 0
+                              ? "Offer price valid till this date"
+                              : "Required only when Offer Price is set"
+                          }
+                        />
+                      </Stack>
+                    </Box>
+                    );
+                  })}
+                </Stack>
+
+                <Alert severity="success" sx={{ mt: 2 }}>
+                  Tip: Select All Cities → Group Select All → enter MRP. Add Offer Price
+                  only when you want a limited-time deal (set Valid Until date).
+                </Alert>
+              </>
+            )}
+          </Box>
 
           <Stack direction="row" spacing={2}>
             <TextField
@@ -925,6 +1512,63 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
             </Select>
           </FormControl>
 
+          {/* Recommended Tests (shown in cart) */}
+          <Divider>
+            <Typography variant="subtitle2" color="primary">
+              Recommended Tests (Cart)
+            </Typography>
+          </Divider>
+
+          <Autocomplete
+            multiple
+            options={recommendedProductOptions}
+            getOptionLabel={(option) =>
+              option.itemType
+                ? `${option.name} (${option.itemType})`
+                : option.name || ""
+            }
+            value={recommendedProductOptions.filter((item) =>
+              formData.recommendedTests.map(String).includes(String(item._id))
+            )}
+            onChange={(_, selected) => {
+              setFormData((prev) => ({
+                ...prev,
+                recommendedTests: selected.map((item) => item._id),
+              }));
+            }}
+            isOptionEqualToValue={(option, value) =>
+              String(option._id) === String(value._id)
+            }
+            loading={productsLoading}
+            disabled={formData.department.length === 0}
+            renderTags={(selected, getTagProps) =>
+              selected.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option._id}
+                  label={option.name}
+                  size="small"
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Recommended Tests"
+                placeholder={
+                  formData.department.length === 0
+                    ? "Select department first"
+                    : "Select same-department tests"
+                }
+                helperText={
+                  formData.department.length === 0
+                    ? "Pehle Department select karo — phir us department ke tests yahan dikhenge."
+                    : "Sirf selected department ke tests recommend list mein aayenge (jaise Radiology → Radiology tests)."
+                }
+              />
+            )}
+          />
+
           {/* ✅ PRODUCT DESCRIPTION — React Quill */}
           <Divider>
             <Typography variant="subtitle2" color="primary">
@@ -947,7 +1591,7 @@ function ItemListingDialog({ open, handleClose, initialData, onSuccess }) {
               placeholder="Write product description here..."
             />
             <Typography variant="caption" color="textSecondary">
-              {"Tip: Use `(CITY)` or `{{CITY}}` in description. Website location change hote hi city automatically update ho jayegi."}
+              {"Tip: Use `(CITY)` or `{{CITY}}` in the description. The city will update automatically when the website location changes."}
             </Typography>
           </Box>
 

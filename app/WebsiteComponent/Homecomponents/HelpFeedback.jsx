@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { FaEnvelope, FaFacebookF, FaMapMarkerAlt, FaPhoneAlt, FaTwitter } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { createLead } from "../../utils/leadStorage";
 import AccountLayout from "./AccountLayout";
 
 const SUPPORT_PHONE = "8448158188";
@@ -21,6 +22,7 @@ const EMPTY_FORM = {
 
 const HelpFeedback = () => {
   const [feedback, setFeedback] = useState(EMPTY_FORM);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -44,9 +46,10 @@ const HelpFeedback = () => {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFeedback((previous) => ({ ...previous, [name]: value }));
+    setSubmitted(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!feedback.name.trim() || !feedback.email.trim() || !feedback.phone.trim()) {
@@ -59,13 +62,40 @@ const HelpFeedback = () => {
       return;
     }
 
-    const subject = encodeURIComponent("Wello Help & Feedback Query");
-    const body = encodeURIComponent(
-      `Full Name: ${feedback.name}\nEmail: ${feedback.email}\nPhone: ${feedback.phone}\nCity: ${feedback.city}\n\nQuery:\n${feedback.message}`
-    );
+    const phoneDigits = feedback.phone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      toast.warn("Please enter a valid phone number.");
+      return;
+    }
 
-    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
-    toast.success("Thank you! Our team will contact you soon.");
+    const lead = await createLead({
+      name: feedback.name.trim(),
+      phone: phoneDigits,
+      email: feedback.email.trim(),
+      city: feedback.city.trim(),
+      source: "Help & Feedback",
+      status: "New",
+      priority: "Medium",
+      interest: "Support / Query",
+      notes: feedback.message.trim(),
+    });
+
+    if (!lead) {
+      toast.error("Could not save your query. Please try again.");
+      setSubmitted(false);
+      return;
+    }
+
+    window.dispatchEvent(new Event("admin-leads-updated"));
+    toast.success("Submitted! Query saved to Leads database.");
+    setSubmitted(true);
+    setFeedback((previous) => ({
+      ...EMPTY_FORM,
+      name: previous.name,
+      email: previous.email,
+      phone: previous.phone,
+      city: previous.city,
+    }));
   };
 
   return (
@@ -107,6 +137,20 @@ const HelpFeedback = () => {
               Fill the Form Below and Our Executives Will Contact You Soon!
             </h2>
             <form className="help-feedback-form" onSubmit={handleSubmit}>
+              {submitted ? (
+                <p
+                  style={{
+                    margin: "0 0 12px",
+                    padding: "12px 14px",
+                    borderRadius: "8px",
+                    background: "#ecfdf5",
+                    color: "#047857",
+                    fontWeight: 600,
+                  }}
+                >
+                  Thank you! Your query is saved. Check Admin → CRM / Leads.
+                </p>
+              ) : null}
               <div className="help-feedback-form-row">
                 <label className="help-feedback-field">
                   <span>Full Name*</span>

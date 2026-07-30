@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "../../../lib/routerCompat";
+import { useLocation as useRouterLocation, useNavigate, useParams } from "../../../lib/routerCompat";
 import TopBar from "../../Homecomponents/TopBar";
 import Navbar from "../../Homecomponents/Navbar";
+import HomePageFooter from "../../Homecomponents/HomePageFooter";
 import Footer from "../../Homecomponents/Footer";
 import reportIcon from "../../../../public/images/reporticon.png";
 import appointmentIcon from "../../../../public/images/appointmenticon.png";
@@ -11,10 +12,17 @@ import bookingHelpIcon from "../../../../public/images/bookingHelpIcon.png";
 import { useCart } from "../../../Components/MainRoute/CartContext";
 import { useLocation } from "../../../Components/MainRoute/LocationContext";
 import {
+  deslugifyLocation,
   fetchCityCollection,
   filterProductsByCity,
   mapApiProduct,
 } from "../../../utils/cityApi";
+import { API_BASE_URL } from "../../../utils/api";
+import {
+  isRadiologyProduct,
+} from "../../../utils/productVisibility";
+import { withProductDemographics } from "../../../utils/cartItemMeta";
+import axios from "axios";
 import { replaceCityText } from "../../../utils/locationText";
 import { toast } from "react-toastify";
 import { FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
@@ -23,18 +31,42 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+const DEFAULT_SCAN_FAQS = [
+  {
+    question: "How can I book this radiology scan?",
+    answer:
+      "Select the scan, add it to cart, choose your preferred slot, and complete checkout to confirm your appointment.",
+  },
+  {
+    question: "How soon will I receive my scan report?",
+    answer:
+      "Most radiology reports are shared within 24-48 hours on WhatsApp and your Wello account dashboard.",
+  },
+  {
+    question: "Do I need to visit the centre for radiology scans?",
+    answer:
+      "Yes, imaging scans such as MRI, CT, X-Ray and Ultrasound are conducted at our partner imaging centres.",
+  },
+];
+
 const TestDetailPage = () => {
   const { city, testName } = useParams();
   const navigate = useNavigate();
+  const routerLocation = useRouterLocation();
+  const isScheduleScanPage = routerLocation.pathname?.startsWith("/schedule-scan");
   const { addToCart } = useCart();
   const { location } = useLocation();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const routeCityName = decodeURIComponent(city || "");
+  const routeCityName = city ? deslugifyLocation(decodeURIComponent(city)) : "";
+  const decodedTestName = testName ? decodeURIComponent(testName) : "";
   const activeCityName =
-    location.city || location.formattedAddress || routeCityName || "Delhi";
+    routeCityName ||
+    location.city ||
+    location.formattedAddress ||
+    "Delhi";
 
   const normalizeFaqs = (faqs) => {
     if (Array.isArray(faqs)) {
@@ -91,6 +123,20 @@ const TestDetailPage = () => {
     [];
 
   const productFaqs = normalizeFaqs(rawFaqs);
+  const displayFaqs =
+    productFaqs.length > 0
+      ? productFaqs
+      : isScheduleScanPage
+        ? DEFAULT_SCAN_FAQS
+        : [];
+  const showFaqSection = displayFaqs.length > 0;
+
+  const displayPrice = Number(
+    (isScheduleScanPage
+      ? product?.raw?.schedulePrice || product?.price
+      : product?.price) || 0
+  );
+  const displayMrp = Number(product?.oldPrice || product?.raw?.mrp || 0);
 
   useEffect(() => {
     let isMounted = true;
@@ -101,21 +147,43 @@ const TestDetailPage = () => {
       setProduct(null);
 
       try {
-        const response = await fetchCityCollection("get_product", activeCityName);
+        const [response, departmentResponse] = await Promise.all([
+          fetchCityCollection("get_product", activeCityName),
+          axios.get(`${API_BASE_URL}/get-departments`),
+        ]);
         if (!isMounted) return;
+
+        const departmentRecords =
+          departmentResponse.data?.departments || [];
 
         const cityMatchedProducts =
           filterProductsByCity(response, activeCityName) || [];
         const mapped = Array.isArray(cityMatchedProducts)
-          ? cityMatchedProducts.map(mapApiProduct)
+          ? cityMatchedProducts.map((product, index) =>
+              mapApiProduct(product, index, activeCityName)
+            )
           : [];
 
         const found = mapped.find(
-          (p) =>
-            p.name.toLowerCase() === decodeURIComponent(testName).toLowerCase()
+          (p) => p.name.toLowerCase() === decodedTestName.toLowerCase()
         );
 
         if (found) {
+          const isRadiology = isRadiologyProduct(found.raw || found, departmentRecords);
+
+          if (!isScheduleScanPage && isRadiology) {
+            navigate(
+              `/schedule-scan/${encodeURIComponent(activeCityName.toLowerCase())}/${encodeURIComponent(found.name)}`,
+              { replace: true }
+            );
+            return;
+          }
+
+          if (isScheduleScanPage && !isRadiology) {
+            setError("This test is available under Book Your Blood Test.");
+            return;
+          }
+
           setProduct(found);
         } else {
           setError(`This test is not available in ${activeCityName}.`);
@@ -133,17 +201,24 @@ const TestDetailPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [activeCityName, testName]);
+  }, [activeCityName, decodedTestName, isScheduleScanPage, navigate]);
 
-  const buildCartItem = (product) => ({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    category: product.category,
-    tests: product.tests,
-    type: product.type,
-    city: activeCityName,
-  });
+  const buildCartItem = (product) =>
+    withProductDemographics(
+      {
+        id: product.id,
+        _id: product.id,
+        name: product.name,
+        price: isScheduleScanPage
+          ? Number(product.raw?.schedulePrice || product.price || 0)
+          : product.price,
+        category: product.category,
+        tests: product.tests,
+        type: product.type,
+        city: activeCityName,
+      },
+      product.raw || product
+    );
 
   const handleAddToCart = () => {
     addToCart(buildCartItem(product));
@@ -165,8 +240,8 @@ const TestDetailPage = () => {
   };
 
   const discount =
-    product?.oldPrice > 0
-      ? Math.round((1 - product.price / product.oldPrice) * 100)
+    displayMrp > displayPrice
+      ? Math.round((1 - displayPrice / displayMrp) * 100)
       : null;
 
   const includedTests = product?.tests || product?.testCount || 1;
@@ -312,11 +387,11 @@ const TestDetailPage = () => {
                 <div className="lab-test-price-card">
                   <div className="lab-test-price-row">
                     <p className="lab-test-price">
-                      Rs. {product.price?.toLocaleString() || 0}
+                      Rs. {displayPrice?.toLocaleString() || 0}
                     </p>
-                    {product.oldPrice > 0 && (
+                    {displayMrp > displayPrice && (
                       <p className="lab-test-old-price">
-                        Rs. {product.oldPrice?.toLocaleString()}
+                        Rs. {displayMrp?.toLocaleString()}
                       </p>
                     )}
                   </div>
@@ -325,7 +400,7 @@ const TestDetailPage = () => {
                     onClick={handleAddToCart}
                     className="lab-test-add-cart"
                   >
-                    ADD TO CART
+                    {isScheduleScanPage ? "SCHEDULE SCAN" : "ADD TO CART"}
                     <ChevronRight className="lab-test-button-icon" />
                   </button>
 
@@ -381,7 +456,9 @@ const TestDetailPage = () => {
 
                 <div className="lab-test-detail-actions">
                   <button
-                    onClick={() => navigate(-1)}
+                    onClick={() =>
+                      navigate(isScheduleScanPage ? "/schedule-scan" : -1)
+                    }
                     className="lab-test-back-button"
                   >
                     Go Back
@@ -390,13 +467,13 @@ const TestDetailPage = () => {
                     onClick={handleBookNow}
                     className="lab-test-book-button"
                   >
-                    Book Now
+                    {isScheduleScanPage ? "Schedule Scan" : "Book Now"}
                   </button>
                 </div>
                 </aside>
               </div>
 
-              {productFaqs.length > 0 && (
+              {showFaqSection && (
                 <section className="lab-test-faq-section">
                   <div className="lab-test-faq-info">
                     <span className="lab-test-faq-pill">
@@ -413,7 +490,7 @@ const TestDetailPage = () => {
                   </div>
 
                   <div className="lab-test-faq-list">
-                    {productFaqs.map((faq, index) => (
+                    {displayFaqs.map((faq, index) => (
                       <details
                         key={`${faq.question}-${index}`}
                         className="lab-test-faq-item"
@@ -436,7 +513,7 @@ const TestDetailPage = () => {
         </div>
       </div>
 
-      <Footer />
+      {isScheduleScanPage ? <HomePageFooter /> : <Footer />}
     </>
   );
 };

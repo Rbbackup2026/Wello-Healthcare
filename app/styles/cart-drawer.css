@@ -13,6 +13,7 @@
   top: 0 !important;
   margin-top: 0;
   z-index: 30;
+  overflow: visible;
 }
 
 .wello-sticky-header .wello-nav-shell.is-mega-open {
@@ -623,6 +624,17 @@
   justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid #e2e2e2;
+}
+
+.wello-patient-test-hint {
+  margin: 0 20px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #5d4037;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .wello-cart-person-head h3 {

@@ -9,6 +9,9 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { replaceCityText } from "../../utils/locationText";
 import { API_BASE_URL } from "../../utils/api";
+import { resolveProductPricingForCity } from "../../utils/cityApi";
+import { describeProductDemographics } from "../../utils/productVisibility";
+import { withProductDemographics } from "../../utils/cartItemMeta";
 
 // ⭐ MATERIAL UI IMPORTS
 import {
@@ -63,6 +66,9 @@ const ItemDetail = ({ id }) => {
     product?.lab?.city,
   ]);
   const productFaqs = normalizeFaqs(product?.faqs || product?.faq);
+  const resolvedPricing = product
+    ? resolveProductPricingForCity(product, location.city)
+    : null;
 
   const hasVisibleDescription = String(renderedProductDescription)
     .replace(/<[^>]*>/g, " ")
@@ -89,11 +95,17 @@ const ItemDetail = ({ id }) => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart({
-        id: product._id,
-        name: product.name,
-        price: product.price || 0,
-      });
+      addToCart(
+        withProductDemographics(
+          {
+            id: product._id,
+            _id: product._id,
+            name: product.name,
+            price: resolvedPricing?.price || product.price || 0,
+          },
+          product
+        )
+      );
 
       toast.success(`${product.name} Added to Cart!`, {
         position: "top-right",
@@ -105,6 +117,8 @@ const ItemDetail = ({ id }) => {
 
   if (loading) return <Box sx={{ textAlign: "center", py: 10 }}>Loading details...</Box>;
   if (!product) return <Box sx={{ textAlign: "center", py: 10 }}>Product details not found.</Box>;
+
+  const suitabilityLabel = describeProductDemographics(product);
 
   return (
     <>
@@ -125,13 +139,16 @@ const ItemDetail = ({ id }) => {
               </Typography>
 
               {/* TEST COUNT */}
-              <Chip
-                label={`${product.testCount || 1} Tests`}
-                color="primary"
-                variant="outlined"
-                sx={{ mt: 2 }}
-              />
-
+              <Box sx={{ display: "flex", gap: 1, mt: 2, flexWrap: "wrap" }}>
+                <Chip
+                  label={`${product.testCount || 1} Tests`}
+                  color="primary"
+                  variant="outlined"
+                />
+                {suitabilityLabel ? (
+                  <Chip label={suitabilityLabel} color="secondary" variant="outlined" />
+                ) : null}
+              </Box>
               {/* SERVICE BOXES */}
               <Box sx={{ display: "flex", gap: 2, mt: 4, flexWrap: "wrap" }}>
                 <Box
@@ -225,7 +242,7 @@ const ItemDetail = ({ id }) => {
               }}
             >
               <Typography variant="h5" fontWeight={700} color="primary">
-                Rs {product.price?.toLocaleString() || 0}
+                Rs {resolvedPricing?.price?.toLocaleString() || product.price?.toLocaleString() || 0}
               </Typography>
 
               <Button

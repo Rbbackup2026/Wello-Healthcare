@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import { createLead } from "../../utils/leadStorage";
 import TopBar from "./TopBar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -80,11 +82,33 @@ const MyAccount = () => {
   const email = user?.email || "";
   const phone = user?.mobileNo || user?.phone || "";
 
-  const handleCallbackSubmit = (event) => {
+  const handleCallbackSubmit = async (event) => {
     event.preventDefault();
     const digits = callbackPhone.replace(/\D/g, "");
-    if (digits.length !== 10) return;
-    window.location.href = "tel:+918448158188";
+    if (digits.length !== 10) {
+      toast.warn("Please enter a valid 10 digit mobile number.");
+      return;
+    }
+
+    const lead = await createLead({
+      name: displayName || "Callback Request",
+      phone: digits,
+      email,
+      city: user?.city || "",
+      source: "Callback",
+      status: "New",
+      priority: "High",
+      interest: "Health Advisor Callback",
+      notes: "Requested callback from My Account",
+    });
+
+    if (!lead) {
+      toast.error("Could not save callback request.");
+      return;
+    }
+
+    toast.success("Callback request saved. Our team will call you soon.");
+    setCallbackPhone("");
   };
 
   return (

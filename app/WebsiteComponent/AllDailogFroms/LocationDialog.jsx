@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaTimes, FaMapMarkerAlt, FaLocationArrow } from "react-icons/fa";
 import { useLocation } from "../../Components/MainRoute/LocationContext";
 import { loadGoogleMapsPlacesApi } from "../../utils/googleMapsLoader";
+import { METRO_CITIES } from "../../utils/cityApi";
 
 const LocationDialog = ({ onClose }) => {
   const { location, setLocation } = useLocation();
@@ -16,11 +17,7 @@ const LocationDialog = ({ onClose }) => {
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const detectTimeoutRef = useRef(null);
 
-  const popularCities = [
-    "Bengaluru", "Chennai", "Delhi",
-    "Gurugram", "Hyderabad", "Kolkata",
-    "Mumbai", "Noida", "Pune",
-  ];
+  const popularCities = METRO_CITIES;
 
   const handleSelectPopularCity = (cityName) => {
     setCity(cityName);

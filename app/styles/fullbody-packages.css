@@ -1,4 +1,13 @@
 ﻿/* Full Body Health Packages Specific UI */
+.fb-page-banner {
+  background: #ffffff;
+  padding-top: 8px;
+}
+
+.fb-page-banner .wello-dots {
+  padding-bottom: 8px;
+}
+
 .fb-hero-banner {
   position: relative;
   overflow: hidden;

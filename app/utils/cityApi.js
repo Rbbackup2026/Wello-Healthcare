@@ -1,5 +1,17 @@
 import { API_BASE_URL } from "./api";
 
+export const METRO_CITIES = [
+  "Bengaluru",
+  "Chennai",
+  "Delhi",
+  "Gurugram",
+  "Hyderabad",
+  "Kolkata",
+  "Mumbai",
+  "Noida",
+  "Pune",
+];
+
 const toTitleCase = (value = "") =>
   value
     .split(" ")
@@ -8,6 +20,13 @@ const toTitleCase = (value = "") =>
     .join(" ");
 
 export const deslugifyLocation = (value = "") => toTitleCase(value.replace(/-/g, " "));
+
+export const slugifyCity = (value = "") =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 const CITY_ALIASES = {
   bangalore: "bengaluru",
@@ -39,12 +58,92 @@ export const normalizeCityName = (value = "") => {
   return CITY_ALIASES[normalizedValue] || normalizedValue;
 };
 
-const getProductCity = (product = {}) =>
-  product?.city ||
-  product?.location?.city ||
-  product?.lab?.city ||
-  product?.labDetails?.city ||
-  "";
+const getProductCity = (product = {}) => {
+  if (Array.isArray(product?.cityPricing) && product.cityPricing.length > 0) {
+    return product.cityPricing.map((entry) => entry.city).join(", ");
+  }
+
+  return (
+    product?.city ||
+    product?.location?.city ||
+    product?.lab?.city ||
+    product?.labDetails?.city ||
+    ""
+  );
+};
+
+export const getProductCityPricing = (product = {}) => {
+  if (Array.isArray(product?.cityPricing) && product.cityPricing.length > 0) {
+    return product.cityPricing;
+  }
+
+  const city = getProductCity(product);
+  if (!city) {
+    return [];
+  }
+
+  return city.split(",").map((entry) => entry.trim()).filter(Boolean).map((entryCity) => ({
+    city: entryCity,
+    price: Number(product?.price) || 0,
+    mrp: Number(product?.mrp) || 0,
+    schedulePrice: Number(product?.schedulePrice) || 0,
+  }));
+};
+
+export const resolveProductPricingForCity = (product = {}, city = "") => {
+  const entries = getProductCityPricing(product);
+  const normalizedRequestedCity = normalizeCityName(city);
+
+  const matchedEntry = entries.find(
+    (entry) => normalizeCityName(entry.city) === normalizedRequestedCity
+  );
+  const selectedEntry = matchedEntry || entries[0];
+
+  const endOfDay = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    date.setHours(23, 59, 59, 999);
+    return date;
+  };
+
+  const resolveFromEntry = (entry = {}, fallbackProduct = {}) => {
+    const mrp = Number(entry.mrp ?? fallbackProduct?.mrp) || 0;
+    const offer = Number(entry.price ?? fallbackProduct?.price) || 0;
+    const validUntil =
+      entry.priceValidUntil || fallbackProduct?.priceValidUntil || null;
+    const until = endOfDay(validUntil);
+    const offerActive =
+      offer > 0 && (!until || Date.now() <= until.getTime());
+
+    if (offerActive) {
+      return {
+        city: entry.city || getProductCity(fallbackProduct),
+        price: offer,
+        mrp: mrp > 0 ? mrp : offer,
+        schedulePrice: Number(entry.schedulePrice ?? fallbackProduct?.schedulePrice) || 0,
+        priceValidUntil: validUntil || null,
+        offerActive: true,
+      };
+    }
+
+    const displayPrice = mrp > 0 ? mrp : offer;
+    return {
+      city: entry.city || getProductCity(fallbackProduct),
+      price: displayPrice,
+      mrp: mrp > 0 ? mrp : displayPrice,
+      schedulePrice: Number(entry.schedulePrice ?? fallbackProduct?.schedulePrice) || 0,
+      priceValidUntil: validUntil || null,
+      offerActive: false,
+    };
+  };
+
+  if (!selectedEntry) {
+    return resolveFromEntry({}, product);
+  }
+
+  return resolveFromEntry(selectedEntry, product);
+};
 
 export const filterProductsByCity = (products = [], city = "") => {
   const normalizedRequestedCity = normalizeCityName(city);
@@ -54,10 +153,23 @@ export const filterProductsByCity = (products = [], city = "") => {
   }
 
   return products.filter((product) => {
+    const cityEntries = getProductCityPricing(product);
+
+    if (cityEntries.length > 0) {
+      return cityEntries.some((entry) => {
+        const normalizedProductCity = normalizeCityName(entry.city);
+        return (
+          normalizedProductCity === normalizedRequestedCity ||
+          normalizedProductCity.startsWith(`${normalizedRequestedCity} `) ||
+          normalizedRequestedCity.startsWith(`${normalizedProductCity} `)
+        );
+      });
+    }
+
     const normalizedProductCity = normalizeCityName(getProductCity(product));
 
     if (!normalizedProductCity) {
-      return false;
+      return true;
     }
 
     return (
@@ -113,7 +225,10 @@ export const fetchCityCollection = async (endpoint, city) => {
   return extractApiArray(payload);
 };
 
-export const mapApiProduct = (product, index) => ({
+export const mapApiProduct = (product, index, selectedCity = "") => {
+  const pricing = resolveProductPricingForCity(product, selectedCity);
+
+  return {
   id: product?._id || product?.id || `product-${index}`,
   name:
     product?.name ||
@@ -127,16 +242,11 @@ export const mapApiProduct = (product, index) => ({
     product?.noOfTests ||
     product?.includeTestCount ||
     null,
-  price:
-    Number(
-      product?.price ??
-        product?.salePrice ??
-        product?.offerPrice ??
-        product?.discountedPrice ??
-        0
-    ) || 0,
+  price: pricing.price,
   oldPrice:
-    Number(product?.mrp ?? product?.oldPrice ?? product?.originalPrice ?? 0) || null,
+    pricing.offerActive && pricing.mrp > pricing.price
+      ? pricing.mrp
+      : null,
   category:
     product?.category?.name ||
     product?.categoryName ||
@@ -157,9 +267,14 @@ export const mapApiProduct = (product, index) => ({
     product?.overview ||
     "",
   faqs: product?.faqs || product?.faq || product?.questions || product?.qa || [],
-  city: product?.city || product?.location?.city || product?.lab?.city || "",
+  city: pricing.city,
+  schedulePrice: pricing.schedulePrice,
+  fromAge: Number(product?.fromAge) || 0,
+  toAge: Number(product?.toAge) || 0,
+  gender: product?.gender || "Both",
   raw: product,
-});
+};
+};
 
 export const mapApiLab = (lab, index) => ({
   id: lab?._id || lab?.id || `lab-${index}`,

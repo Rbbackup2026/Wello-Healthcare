@@ -28,6 +28,7 @@ import OrderConfirmation from "./OrderConfirmation";
 // import Pagelist from "../ComponentPage/HomeBanner/Pagelist";
 import Findlab from "../../WebsiteComponent/FindLabComponents/Findlab";
 import LabTestsPage from "../../WebsiteComponent/FindLabComponents/FindTestlab/LabTestsPage";
+import ScheduleScanPage from "../../WebsiteComponent/FindLabComponents/ScheduleScan/ScheduleScanPage";
 import FullbodyHealthPackages from "../../WebsiteComponent/FindLabComponents/Fullbody/FullbodyHealthPackages";
 import ReportsPage from "../../WebsiteComponent/FindLabComponents/REportDownload/ReportsPage";
 import AdminCarouselUpload from "../Admin/AdminCarouselUpload";
@@ -49,6 +50,7 @@ import SavedAddresses from "../../WebsiteComponent/Homecomponents/SavedAddresses
 import CouponTable from "../ComponentPage/CouponTable";
 import { ToastContainer } from "react-toastify";
 import UserList from "../ComponentPage/UsersPage/UserList";
+import LeadList from "../ComponentPage/UsersPage/LeadList";
 import Newsletter from "../ComponentPage/UsersPage/Newsletter";
 import ContactInquiry from "../ComponentPage/UsersPage/ContactInquiry";
 import GetInTouchInquiry from "../ComponentPage/UsersPage/GetInTouchInquiry";
@@ -64,7 +66,6 @@ import MetaManagement from "../ComponentPage/SystemSetting/MetaManagement";
 import AdminLoginHistory from "../ComponentPage/SystemSetting/AdminLoginHistory";
 import LabTestDetailPage from "../../WebsiteComponent/FindLabComponents/FindTestlab/LabTestDetailPage";
 import SitemapViewer from "../ComponentPage/SiteMapViewer/SitemapViewer";
-import CartNotificationPopup from "../../WebsiteComponent/Homecomponents/CartNotificationPopup";
 import { useLocation as useLocationContext } from "./LocationContext";
 import { deslugifyLocation } from "../../utils/cityApi";
 
@@ -79,8 +80,13 @@ function ScrollToTop() {
     // URL से लोकेशन को सिंक करने का लॉजिक (Sitemap लिंक्स के लिए)
     const searchParams = new URLSearchParams(search);
     const cityFromQuery = searchParams.get("city"); // ?city=Delhi चेक करता है
-    const pathMatch = pathname.match(/\/labs\/city\/([^/]+)/); // /labs/city/delhi चेक करता है
-    const cityFromPath = pathMatch ? deslugifyLocation(pathMatch[1]) : null;
+    const pathMatch = pathname.match(/\/labs\/city\/([^/]+)/);
+    const fullBodyCityMatch = pathname.match(/\/full-body-health-checkup\/city\/([^/]+)/);
+    const cityFromPath = pathMatch
+      ? deslugifyLocation(pathMatch[1])
+      : fullBodyCityMatch
+        ? deslugifyLocation(fullBodyCityMatch[1])
+        : null;
 
     const targetCity = cityFromQuery || cityFromPath;
 
@@ -102,10 +108,6 @@ function ScrollToTop() {
 
 function MainRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [customerId, setCustomerId] = useState(() => {
-    const user = JSON.parse(localStorage.getItem("customerUser") || "null");
-    return user?._id || user?.id || null;
-  });
 
   useEffect(() => {
     const user = localStorage.getItem("adminUser");
@@ -114,20 +116,6 @@ function MainRoute() {
     if (user && token) {
       setIsAuthenticated(true);
     }
-
-    // कस्टमर यूजर सेशन को ट्रैक करने के लिए
-    const syncUser = () => {
-      const u = JSON.parse(localStorage.getItem("customerUser") || "null");
-      setCustomerId(u?._id || u?.id || null);
-    };
-
-    window.addEventListener("customer-auth-changed", syncUser);
-    window.addEventListener("storage", syncUser);
-
-    return () => {
-      window.removeEventListener("customer-auth-changed", syncUser);
-      window.removeEventListener("storage", syncUser);
-    };
   }, []);
 
   const handleAuthentication = (status) => {
@@ -138,7 +126,6 @@ function MainRoute() {
   return (
     <CartProvider>
       <ScrollToTop />
-      <CartNotificationPopup currentUserId={customerId} />
       <ToastContainer
         position="top-right"
         autoClose={1500}
@@ -178,6 +165,7 @@ function MainRoute() {
         <Route path="/blog_tags" element={<BlogTags/>} />
         <Route path="/discount" element={<CouponTable/>} />
         <Route path="/customer_list" element={<UserList/>} />
+        <Route path="/lead_list" element={<LeadList/>} />
         <Route path="/newsletter_list" element={<Newsletter/>} />
         <Route path="/help_list" element={<ContactInquiry/>} />
         <Route path="/get_tuch_inq_list" element={<GetInTouchInquiry/>} />
@@ -234,6 +222,7 @@ function MainRoute() {
   <Route path="blog_tags" element={<BlogTags />} />
   <Route path="discount" element={<CouponTable />} />
   <Route path="customer_list" element={<UserList />} />
+  <Route path="lead_list" element={<LeadList />} />
   <Route path="newsletter_list" element={<Newsletter />} />
   <Route path="help_list" element={<ContactInquiry />} />
   <Route path="get_tuch_inq_list" element={<GetInTouchInquiry />} />
@@ -257,7 +246,10 @@ function MainRoute() {
                 <Route path="/labs/city/:citySlug" element={<Findlab/>} />
                 <Route path="/lab-tests" element={<LabTestsPage/>} />
                 <Route path="/lab-tests/:city/:testName" element={<LabTestDetailPage />} />
+                <Route path="/full-body-health-checkup/city/:citySlug" element={<FullbodyHealthPackages/>} />
                 <Route path="/full-body-health-checkup" element={<FullbodyHealthPackages/>} />
+                <Route path="/schedule-scan" element={<ScheduleScanPage/>} />
+                <Route path="/schedule-scan/:city/:testName" element={<LabTestDetailPage />} />
                 <Route path="/download-report" element={<ReportsPage/>} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
                 <Route path="/blog-category/:slug" element={<BlogCategoryDetailPage/>} />

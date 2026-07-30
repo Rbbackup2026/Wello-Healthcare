@@ -13,6 +13,12 @@ import {
   FaChevronUp,
 } from "react-icons/fa";
 import { toApiUrl } from "../../utils/api";
+import { extractApiArray } from "../../utils/cityApi";
+import {
+  isPopularOrFullBodyProduct,
+  isProductActive,
+} from "../../utils/productVisibility";
+import SupportLeadPopup from "./SupportLeadPopup";
 
 const popularTests = [
   "CBC Test", "D Dimer Test", "ESR Test", "HbA1c Test", "Widal Test",
@@ -102,6 +108,7 @@ export default function Footer() {
   // ✅ State for only these two specific sections
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isHealthOpen, setIsHealthOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,11 +120,10 @@ export default function Footer() {
 
         setCategories(catRes.data.filter((cat) => cat.status === true));
 
-        const allProducts = prodRes.data?.data || prodRes.data?.items || prodRes.data || [];
-        const productsArray = Array.isArray(allProducts) ? allProducts : (allProducts.data || []);
-        const filtered = productsArray.filter(p => 
-          (p.showPopularPackage === "Yes" || p.showFullBody === "Yes") && 
-          (p.status === true || p.status === "Active" || p.isActive !== false)
+        const allProducts = extractApiArray(prodRes.data);
+        const filtered = allProducts.filter(
+          (product) =>
+            isPopularOrFullBodyProduct(product) && isProductActive(product)
         );
         setPopularHealthCheckups(filtered);
       } catch (err) {
@@ -267,12 +273,18 @@ export default function Footer() {
           <p className="text-black font-medium">
             Get a Call Back from our Health Advisor
           </p>
-          <button className="flex items-center gap-2 bg-[#0d2d5a] text-white px-4 py-2 rounded-md shadow hover:bg-[#0a2040] transition cursor-pointer">
+          <button
+            type="button"
+            onClick={() => setSupportOpen(true)}
+            className="flex items-center gap-2 bg-[#0d2d5a] text-white px-4 py-2 rounded-md shadow hover:bg-[#0a2040] transition cursor-pointer"
+          >
             <FaPhone />
             Call me now
           </button>
         </div>
       </div>
+
+      <SupportLeadPopup open={supportOpen} onClose={() => setSupportOpen(false)} />
     </footer>
   );
 }

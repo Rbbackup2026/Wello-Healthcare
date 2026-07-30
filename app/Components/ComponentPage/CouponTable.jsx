@@ -133,6 +133,8 @@ const CouponTable = () => {
               <TableCell><b>Value</b></TableCell>
               <TableCell><b>Min Amount</b></TableCell>
               <TableCell><b>Expiry</b></TableCell>
+              <TableCell><b>Cities</b></TableCell>
+              <TableCell><b>Products</b></TableCell>
               <TableCell><b>Status</b></TableCell>
               <TableCell><b>Action</b></TableCell>
             </TableRow>
@@ -147,6 +149,14 @@ const CouponTable = () => {
                   <TableCell>{coupon.discountValue}</TableCell>
                   <TableCell>{coupon.minAmount}</TableCell>
                   <TableCell>{new Date(coupon.expiry).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {coupon.cities?.length ? coupon.cities.join(", ") : "All cities"}
+                  </TableCell>
+                  <TableCell>
+                    {coupon.products?.length
+                      ? `${coupon.products.length} selected`
+                      : "All products"}
+                  </TableCell>
                   <TableCell>
                     <Switch
                       checked={coupon.active}
@@ -166,7 +176,7 @@ const CouponTable = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={9} align="center">
                   {loading ? "Loading..." : "No Coupons Found"}
                 </TableCell>
               </TableRow>

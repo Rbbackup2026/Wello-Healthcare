@@ -119,7 +119,7 @@ export const fetchLabTestForSeo = async (city, testName) => {
 
     if (!match) return null;
 
-    const mapped = mapApiProduct(match, 0);
+    const mapped = mapApiProduct(match, 0, cityName);
     return {
       id: mapped.id,
       name: mapped.name,

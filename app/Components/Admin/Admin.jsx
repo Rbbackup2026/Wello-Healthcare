@@ -31,6 +31,7 @@ import {
   Web as WebIcon,
   LocationOn as LocationIcon,
   People as PeopleIcon,
+  PersonAdd as PersonAddIcon,
   Sms as SmsIcon,
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
@@ -40,6 +41,7 @@ import {
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "../../lib/routerCompat";
 import Profile from "../Profile/Profile";
+import AdminAxiosAuth from "./AdminAxiosAuth";
 
 const drawerWidth = 260;
 
@@ -181,11 +183,18 @@ const NAV_ITEMS = [
     ],
   },
   {
+    id: "leads",
+    label: "CRM / Leads",
+    icon: <PersonAddIcon sx={{ fontSize: "1.2rem" }} />,
+    to: "/admin/lead_list",
+  },
+  {
     id: "users",
     label: "Users",
     icon: <PeopleIcon sx={{ fontSize: "1.2rem" }} />,
     children: [
       { label: "User List", to: "/admin/customer_list" },
+      { label: "CRM Leads", to: "/admin/lead_list" },
       { label: "Newsletter List", to: "/admin/newsletter_list" },
       { label: "Contact Inquiry", to: "/admin/help_list" },
       { label: "Get In Touch Inquiry", to: "/admin/get_tuch_inq_list" },
@@ -355,11 +364,21 @@ export default function Admin({ children }) {
   const [expandedId, setExpandedId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  /* Auth guard */
+  /* Auth guard — also reject expired JWT (localStorage can outlive the token) */
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
-    if (!token) navigate("/admin_index", { replace: true });
-    else setIsAuthenticated(true);
+    const tokenExpiry = localStorage.getItem("adminTokenExpiry");
+    const expired = tokenExpiry && Date.now() > parseInt(tokenExpiry, 10);
+
+    if (!token || expired) {
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminUser");
+      localStorage.removeItem("adminTokenExpiry");
+      localStorage.removeItem("adminLoginTime");
+      navigate("/admin_index", { replace: true });
+      return;
+    }
+    setIsAuthenticated(true);
   }, [navigate]);
 
   /* Auto-expand the group that owns the current route */
@@ -381,6 +400,7 @@ export default function Admin({ children }) {
 
   return (
     <Box sx={{ display: "flex" }}>
+      <AdminAxiosAuth />
       <CssBaseline />
 
       {/* ── Top AppBar ── */}

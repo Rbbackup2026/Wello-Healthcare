@@ -14,6 +14,7 @@ import { useLocation } from "../../Components/MainRoute/LocationContext";
 import LocationDialog from "../AllDailogFroms/LocationDialog";
 import LoginModal from "./LoginFolder/LoginModal";
 import LoginProfileDropDown from "./LoginFolder/LoginProfileDropDown";
+import SupportLeadPopup from "./SupportLeadPopup";
 import { FaPhoneAlt } from "react-icons/fa";
 import { API_BASE_URL } from "../../utils/api";
 
@@ -118,6 +119,7 @@ const TopBar = () => {
   const { locationLabel } = useLocation();
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const [allBlogs, setAllBlogs] = useState([]);
@@ -304,14 +306,22 @@ const TopBar = () => {
 
           <LoginProfileDropDown onOpenLogin={() => setLoginOpen(true)} variant="topbar" />
 
-          <a
-            href="tel:+918448158188"
+          <button
+            type="button"
             className="wello-header-link wello-support-link"
-            style={topbarStyles.headerControl}
+            style={{
+              ...topbarStyles.headerControl,
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              font: "inherit",
+              color: "inherit",
+            }}
+            onClick={() => setSupportOpen(true)}
           >
             <FaPhoneAlt />
             Support
-          </a>
+          </button>
         </div>
       </header>
 
@@ -319,6 +329,7 @@ const TopBar = () => {
         <LocationDialog onClose={() => setLocationDialogOpen(false)} />
       )}
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <SupportLeadPopup open={supportOpen} onClose={() => setSupportOpen(false)} />
     </>
   );
 };

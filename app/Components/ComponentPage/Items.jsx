@@ -23,10 +23,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import DownloadIcon from "@mui/icons-material/Download";
 import { useNavigate } from "../../lib/routerCompat";
 import axios from "axios";
 import ItemListingDialog from "../DailogForm/ItemListingDailog";
 import { API_BASE_URL } from "../../utils/api";
+import { downloadItemsCsvTemplate } from "../../utils/itemsCsvTemplate";
 
 const extractItems = (payload) => {
   if (Array.isArray(payload)) return payload;
@@ -196,8 +198,13 @@ function Items() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       const result = response.data || {};
+      const errorCount = Array.isArray(result.errors) ? result.errors.length : 0;
+      const firstError =
+        errorCount > 0
+          ? ` First error (row ${result.errors[0].row}): ${result.errors[0].message}`
+          : "";
       showSnackbar(
-        `CSV import completed: ${result.created || 0} created, ${result.updated || 0} updated, ${result.skipped || 0} skipped`,
+        `CSV import: ${result.created || 0} created, ${result.updated || 0} updated, ${result.skipped || 0} skipped.${firstError}`,
         result.skipped > 0 ? "warning" : "success"
       );
       fetchItems();
@@ -210,6 +217,11 @@ function Items() {
     } finally {
       setCsvImporting(false);
     }
+  };
+
+  const handleDownloadCsvTemplate = () => {
+    downloadItemsCsvTemplate();
+    showSnackbar("CSV template downloaded", "success");
   };
 
   const columns = [
@@ -318,6 +330,13 @@ function Items() {
             hidden
             onChange={handleCsvImport}
           />
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            onClick={handleDownloadCsvTemplate}
+          >
+            CSV Template
+          </Button>
           <Button
             variant="outlined"
             color="success"

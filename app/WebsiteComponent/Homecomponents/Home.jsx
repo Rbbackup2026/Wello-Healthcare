@@ -7,16 +7,24 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaStar,
-  FaMapMarkerAlt,
-  FaPhoneAlt,
-  FaEnvelope,
 } from "react-icons/fa";
+import Link from "next/link";
 import TopBar from "./TopBar";
 import Navbar from "./Navbar";
 import HealthcareHero from "./HealthcareHero";
+import HomePageFooter from "./HomePageFooter";
 import { useLocation } from "../../Components/MainRoute/LocationContext";
-import { API_BASE_URL, toAssetUrl } from "../../utils/api";
-import { extractApiArray, normalizeCityName } from "../../utils/cityApi";
+import { API_BASE_URL, API_ORIGIN, toAssetUrl } from "../../utils/api";
+import {
+  extractApiArray,
+  normalizeCityName,
+} from "../../utils/cityApi";
+import {
+  isProductActive,
+  isShownOnHome,
+  isShownOnHomeDisease,
+  productMatchesCity,
+} from "../../utils/productVisibility";
 import axios from "axios"; // Import axios
 
 const teal = "#12bdb8";
@@ -41,17 +49,18 @@ const blogCards = [
   "Lorem Ipsum is simply dummy text",
 ];
 
-const homeFooterSections = [
-  {
-    title: "Full Body Health Checkup",
-    content:
-      "Full Body Checkup in Ahmedabad / Full Body Checkup in Bengaluru / Full Body Checkup in Chandigarh / Full Body Checkup in Chennai / Full Body Checkup in Delhi / Full Body Checkup in Faridabad / Full Body Checkup in Ghaziabad / Full Body Checkup in Greater Noida / Full Body Checkup in Gurgaon / Full Body Checkup in Hyderabad / Full Body Checkup in Indore / Full Body Checkup in Jaipur / Full Body Checkup in Kanpur / Full Body Checkup in Kolkata / Full Body Checkup in Lucknow / Full Body Checkup in Ludhiana / Full Body Checkup in Mumbai / Full Body Checkup in Noida / Full Body Checkup in Patna / Full Body Checkup in Pune",
-  },
-  { title: "Most Popular Health Tests", content: "" },
-  { title: "Most Popular Radiology Tests", content: "" },
-  { title: "TEST BY RISKS", content: "" },
-  { title: "TEST BY HABITS", content: "" },
-];
+const DEFAULT_BLOG_IMAGE = "/images/blog-blood-pressure.png";
+
+const getBlogImageUrl = (image = "") => {
+  if (!image || typeof image !== "string") return DEFAULT_BLOG_IMAGE;
+
+  const normalizedImage = image.trim();
+  if (!normalizedImage) return DEFAULT_BLOG_IMAGE;
+  if (/^https?:\/\//i.test(normalizedImage)) return toAssetUrl(normalizedImage);
+  if (normalizedImage.startsWith("/")) return toAssetUrl(normalizedImage);
+
+  return `${API_ORIGIN}/uploads/${normalizedImage}`;
+};
 
 const isTruthy = (value) => {
   if (typeof value === "boolean") return value;
@@ -274,28 +283,88 @@ const Home = () => {
   const [loadingWomenPackages, setLoadingWomenPackages] = useState(true);
   const [loadingMenPackages, setLoadingMenPackages] = useState(true);
   const [loadingRiskCards, setLoadingRiskCards] = useState(true);
-  const [openFooterSection, setOpenFooterSection] = useState(0);
+  const [homeBlogs, setHomeBlogs] = useState([]);
+  const [loadingHomeBlogs, setLoadingHomeBlogs] = useState(true);
+  const [homeTestimonials, setHomeTestimonials] = useState([]);
+  const [homeFaqs, setHomeFaqs] = useState([]);
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const categorySliderRef = useRef(null);
-  const catCurrentRef = useRef(0);
+  const categoryOffsetRef = useRef(0);
+  const categoryRafRef = useRef(null);
+  const categoryLastTimeRef = useRef(0);
+  const categoryHoverPausedRef = useRef(false);
 
-const CARD_W = 256;
-const CARD_GAP = 30;
-const VISIBLE = 4;
+  const CARD_W = 256;
+  const CARD_GAP = 30;
+  const CATEGORY_SCROLL_SPEED_PX_PER_SEC = 26;
 
-const scrollCategories = (direction) => {
-  if (!categorySliderRef.current) return;
-  const total = categorySliderRef.current.querySelectorAll(".pdf-category-card").length;
-  const max = total - VISIBLE;
-  const next = direction === "left"
-    ? Math.max(0, catCurrentRef.current - 1)
-    : Math.min(max, catCurrentRef.current + 1);
-  catCurrentRef.current = next;
-  categorySliderRef.current.style.transform =
-    `translateX(-${next * (CARD_W + CARD_GAP)}px)`;
-  categorySliderRef.current.style.transition =
-    "transform 0.35s cubic-bezier(.4,0,.2,1)";
-};
+  const getCategoryTrackWidth = () =>
+    healthCategories.length * (CARD_W + CARD_GAP);
+
+  const scrollCategories = (direction) => {
+    const trackWidth = getCategoryTrackWidth();
+    if (!trackWidth) return;
+
+    const stride = CARD_W + CARD_GAP;
+    categoryOffsetRef.current += direction === "left" ? -stride : stride;
+
+    if (categoryOffsetRef.current < 0) {
+      categoryOffsetRef.current += trackWidth;
+    } else if (categoryOffsetRef.current >= trackWidth) {
+      categoryOffsetRef.current -= trackWidth;
+    }
+  };
+
+  useEffect(() => {
+    categoryOffsetRef.current = 0;
+    categoryLastTimeRef.current = 0;
+
+    if (categorySliderRef.current) {
+      categorySliderRef.current.style.transform = "translateX(0)";
+    }
+  }, [healthCategories]);
+
+  useEffect(() => {
+    if (loadingHealthCategories || healthCategories.length === 0) {
+      return undefined;
+    }
+
+    const animate = (timestamp) => {
+      if (!categoryLastTimeRef.current) {
+        categoryLastTimeRef.current = timestamp;
+      }
+
+      const delta = timestamp - categoryLastTimeRef.current;
+      categoryLastTimeRef.current = timestamp;
+      const trackWidth = getCategoryTrackWidth();
+
+      if (trackWidth > 0 && !categoryHoverPausedRef.current) {
+        categoryOffsetRef.current += (CATEGORY_SCROLL_SPEED_PX_PER_SEC * delta) / 1000;
+
+        if (categoryOffsetRef.current >= trackWidth) {
+          categoryOffsetRef.current -= trackWidth;
+        }
+      }
+
+      if (categorySliderRef.current) {
+        categorySliderRef.current.style.transition = "none";
+        categorySliderRef.current.style.transform = `translateX(-${categoryOffsetRef.current}px)`;
+      }
+
+      categoryRafRef.current = window.requestAnimationFrame(animate);
+    };
+
+    categoryRafRef.current = window.requestAnimationFrame(animate);
+
+    return () => {
+      if (categoryRafRef.current) {
+        window.cancelAnimationFrame(categoryRafRef.current);
+        categoryRafRef.current = null;
+      }
+      categoryLastTimeRef.current = 0;
+    };
+  }, [loadingHealthCategories, healthCategories]);
 
   useEffect(() => {
     const fetchHomeCategories = async () => {
@@ -304,7 +373,7 @@ const scrollCategories = (direction) => {
         const res = await axios.get(`${API_BASE_URL}/categories`);
         const categoriesData = Array.isArray(res.data) ? res.data : [];
         const homeCats = categoriesData
-          .filter((cat) => isTruthy(cat.status) && isTruthy(cat.showinhome))
+          .filter((cat) => isTruthy(cat.status) && isShownOnHome(cat))
           .map((cat) => ({
             title: cat.name || "Category",
             imgUrl: cat.iconimg 
@@ -339,21 +408,9 @@ const scrollCategories = (direction) => {
 
         const productsArray = extractApiArray(prodRes.data);
         const categoriesData = extractApiArray(catRes.data);
-        const selectedCity = normalizeCityName(location?.city || "");
 
-        const cityFiltered = productsArray.filter(p => {
-          const isActive = isTruthy(p.status) || isTruthy(p.isActive);
-          const productCity = normalizeCityName(
-            p.city || p.location?.city || p.lab?.city || p.labDetails?.city || ""
-          );
-          const matchesCity =
-            !selectedCity ||
-            !productCity ||
-            productCity === selectedCity ||
-            productCity.startsWith(`${selectedCity} `) ||
-            selectedCity.startsWith(`${productCity} `);
-
-          return isActive && matchesCity;
+        const cityFiltered = productsArray.filter((product) => {
+          return isProductActive(product) && productMatchesCity(product, location?.city || "");
         });
 
         // Helper to check category match (handles IDs, names, objects, arrays, and fallback fields)
@@ -403,12 +460,12 @@ const scrollCategories = (direction) => {
         const diseasesData = res.data?.diseases || res.data || [];
 
         const filteredAndMappedDiseases = diseasesData
-          .filter(disease => disease.showHome === true && disease.isActive !== false)
+          .filter((disease) => isShownOnHomeDisease(disease))
           .map(disease => ({
             title: disease.name,
-            text: disease.description ? `${disease.description.substring(0, 100)}...` : '', // Shorten description
-            icon: getImageUrl(disease), // Use the helper function for image
-            _id: disease._id, // Keep original ID for linking if needed
+            text: disease.description ? `${disease.description.substring(0, 100)}...` : '',
+            icon: getImageUrl(disease),
+            _id: disease._id,
           }));
         setDynamicRiskCards(filteredAndMappedDiseases);
       } catch (err) {
@@ -420,6 +477,42 @@ const scrollCategories = (direction) => {
     };
 
     fetchDiseasesForHome();
+  }, []);
+
+  useEffect(() => {
+    const fetchHomeBlogs = async () => {
+      try {
+        setLoadingHomeBlogs(true);
+        const res = await axios.get(`${API_BASE_URL}/blogget-active`);
+        const blogsData = extractApiArray(res.data);
+        setHomeBlogs(blogsData.slice(0, 3));
+      } catch (err) {
+        console.error("Failed to fetch home blogs:", err);
+        setHomeBlogs([]);
+      } finally {
+        setLoadingHomeBlogs(false);
+      }
+    };
+
+    fetchHomeBlogs();
+  }, []);
+
+  useEffect(() => {
+    const fetchCmsHome = async () => {
+      try {
+        const [faqRes, testRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/site-faqs`, { params: { home: true } }),
+          axios.get(`${API_BASE_URL}/testimonials`, { params: { home: true } }),
+        ]);
+        setHomeFaqs(faqRes.data?.faqs || []);
+        setHomeTestimonials(testRes.data?.testimonials || []);
+      } catch (err) {
+        console.error("Failed to fetch FAQ/testimonials:", err);
+        setHomeFaqs([]);
+        setHomeTestimonials([]);
+      }
+    };
+    fetchCmsHome();
   }, []);
 
   return (
@@ -502,12 +595,18 @@ const scrollCategories = (direction) => {
         onNext={() => scrollCategories("right")}
       >
         <div
-          className="pdf-slider-content"
+          className="pdf-slider-content pdf-category-slider-viewport"
           style={{ overflow: "hidden", width: "calc(4 * 256px + 3 * 30px)" }}
+          onMouseEnter={() => {
+            categoryHoverPausedRef.current = true;
+          }}
+          onMouseLeave={() => {
+            categoryHoverPausedRef.current = false;
+          }}
         >
-          <div className="pdf-category-grid" ref={categorySliderRef}>
-            {healthCategories.map((item) => (
-              <a href={item.href} className="pdf-category-card" key={item.title}>
+          <div className="pdf-category-grid pdf-category-grid--continuous" ref={categorySliderRef}>
+            {[...healthCategories, ...healthCategories].map((item, index) => (
+              <a href={item.href} className="pdf-category-card" key={`${item.title}-${index}`}>
                 <div className="pdf-category-icon-wrapper">
                   <img
                     className="pdf-category-icon"
@@ -550,7 +649,7 @@ const scrollCategories = (direction) => {
                     <div>
                       <h3>{title}</h3>
                       
-                      <a href="/download-report">VIEW ALL SCANS</a>
+                      <a href="/schedule-scan">VIEW ALL SCANS</a>
                     </div>
                   </article>
                 ))}
@@ -611,28 +710,40 @@ const scrollCategories = (direction) => {
               Hear from Those We’ve Cared For
             </h2>
             <div className="pdf-testimonial-grid">
-              <article>
-                <img
-                  src="/images/Rectangle8.png"
-                  alt="Linda A."
-                  width="70"
-                  height="70"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <p>"After my knee surgery, the convenience of online consultations made my recovery smoother than I could have imagined."<br />- Linda A.</p>
-              </article>
-              <article>
-                <img
-                  src="/images/Rectangle8a.png"
-                  alt="Henry B."
-                  width="70"
-                  height="70"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <p>"Managing chronic conditions like diabetes requires a lot of vigilance, and the medicine refill system has simplified my life."<br />- Henry B.</p>
-              </article>
+              {(homeTestimonials.length > 0
+                ? homeTestimonials
+                : [
+                    {
+                      _id: "fallback-1",
+                      name: "Linda A.",
+                      quote:
+                        "After my knee surgery, the convenience of online consultations made my recovery smoother than I could have imagined.",
+                      image: "/images/Rectangle8.png",
+                    },
+                    {
+                      _id: "fallback-2",
+                      name: "Henry B.",
+                      quote:
+                        "Managing chronic conditions like diabetes requires a lot of vigilance, and the medicine refill system has simplified my life.",
+                      image: "/images/Rectangle8a.png",
+                    },
+                  ]
+              ).map((item) => (
+                <article key={item._id}>
+                  <img
+                    src={item.image || "/images/Rectangle8.png"}
+                    alt={item.name}
+                    width="70"
+                    height="70"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <p>
+                    &quot;{item.quote}&quot;
+                    <br />- {item.name}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -645,19 +756,48 @@ const scrollCategories = (direction) => {
               <p>Find quick answers to common questions about our healthcare services and bookings.</p>
             </div>
             <div className="pdf-faq-list">
-              <article className="open">
-                <div><h3>What services do you offer?</h3><FaChevronUp /></div>
-                <p>We provide a wide range of healthcare services including full body checkups, diagnostic tests, doctor consultations, and preventive health packages all designed to keep you healthy and informed.</p>
-              </article>
-              {[
-                "How can I book a test or appointment?",
-                "Are home sample collections available?",
-                "How soon will I receive my reports?",
-              ].map((item) => (
-                <article key={item}>
-                  <div><h3>{item}</h3><FaChevronDown /></div>
-                </article>
-              ))}
+              {(homeFaqs.length > 0
+                ? homeFaqs
+                : [
+                    {
+                      _id: "f1",
+                      question: "What services do you offer?",
+                      answer:
+                        "We provide a wide range of healthcare services including full body checkups, diagnostic tests, doctor consultations, and preventive health packages all designed to keep you healthy and informed.",
+                    },
+                    {
+                      _id: "f2",
+                      question: "How can I book a test or appointment?",
+                      answer: "",
+                    },
+                    {
+                      _id: "f3",
+                      question: "Are home sample collections available?",
+                      answer: "",
+                    },
+                    {
+                      _id: "f4",
+                      question: "How soon will I receive my reports?",
+                      answer: "",
+                    },
+                  ]
+              ).map((item, index) => {
+                const isOpen = openFaqIndex === index;
+                return (
+                  <article
+                    key={item._id}
+                    className={isOpen ? "open" : undefined}
+                    onClick={() => setOpenFaqIndex(isOpen ? -1 : index)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div>
+                      <h3>{item.question}</h3>
+                      {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+                    </div>
+                    {isOpen && item.answer ? <p>{item.answer}</p> : null}
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -665,97 +805,60 @@ const scrollCategories = (direction) => {
         <section className="pdf-section pdf-blogs-section">
           <div className="pdf-section-inner">
             <h2 className="pdf-center-title">Our <span className="pdf-highlight">Blogs</span></h2>
-            <div className="pdf-blogs-grid">
-              {blogCards.map((title, index) => (
-                <article className="pdf-blog-card" key={`${title}-${index}`}>
-                  <img
-                    src="/images/blog-blood-pressure.png"
-                    alt={title}
-                    width="385"
-                    height="257"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div>
-                    <h3>{title}</h3>
-                    <a href="/blogs">Read More</a>
-                  </div>
-                </article>
-              ))}
-            </div>
+            {loadingHomeBlogs ? (
+              <p className="text-center py-4">Loading blogs...</p>
+            ) : homeBlogs.length === 0 ? (
+              <div className="pdf-blogs-grid">
+                {blogCards.map((title, index) => (
+                  <article className="pdf-blog-card" key={`${title}-${index}`}>
+                    <img
+                      src={DEFAULT_BLOG_IMAGE}
+                      alt={title}
+                      width="385"
+                      height="257"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <div>
+                      <h3>{title}</h3>
+                      <a href="/blogs">Read More</a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="pdf-blogs-grid">
+                {homeBlogs.map((blog) => (
+                  <article className="pdf-blog-card" key={blog._id}>
+                    <img
+                      src={getBlogImageUrl(
+                        blog.imageUrl ||
+                          blog.image ||
+                          blog.thumbnail ||
+                          blog.bannerImage ||
+                          blog.coverImage
+                      )}
+                      alt={blog.name || "Blog"}
+                      width="385"
+                      height="257"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.src = DEFAULT_BLOG_IMAGE;
+                      }}
+                    />
+                    <div>
+                      <h3>{blog.name}</h3>
+                      <a href={`/blog/${blog._id}`}>Read More</a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
-        <footer className="pdf-home-footer">
-          <div className="pdf-home-footer-links">
-            {homeFooterSections.map((section, index) => {
-              const isOpen = openFooterSection === index;
-
-              return (
-                <div className="pdf-home-footer-row" key={section.title}>
-                  <button
-                    type="button"
-                    onClick={() => setOpenFooterSection(isOpen ? -1 : index)}
-                    aria-expanded={isOpen}
-                  >
-                    <span>{section.title}</span>
-                    <span className="pdf-home-footer-toggle">{isOpen ? "-" : "+"}</span>
-                  </button>
-                  {isOpen && section.content && (
-                    <p>{section.content}</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="pdf-home-footer-main">
-            <div className="pdf-home-footer-brand">
-              <h2>WELLO</h2>
-              <span>Healthcare</span>
-              <p>
-                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text.
-              </p>
-            </div>
-
-            <div style={{ width: '225px', height: '223px', opacity: 1 }}>
-              <h3>Quick Links</h3>
-              <a href="/about-us">About Us</a>
-              <a href="/team">Our Teams</a>
-              <a href="/lab-tests">Book your blood tests</a>
-              <a href="/full-body-health-checkup">Full body health checkup</a>
-              <a href="/download-report">Health scans</a>
-            </div>
-
-            <div style={{ width: '176px', height: '260px', opacity: 1 }}>
-              <h3>Info</h3>
-              <a href="/blogs">Blogs</a>
-              <a href="/gallery">Gallery</a>
-              <a href="/career">Career</a>
-              <a href="/contact-us">Reach Us</a>
-              <a href="/terms">Terms & Conditions</a>
-              <a href="/privacy-policy">Privacy Policy</a>
-            </div>
-
-            <div className="pdf-home-footer-reach">
-              <h3>Reach Us</h3>
-              <p><FaMapMarkerAlt /> <span>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</span></p>
-              <p><FaPhoneAlt /> <span>0125767578574, 0124671754770</span></p>
-              <p><FaEnvelope /> <span>info@otherdvc.com</span></p>
-              <h3>Follow on Us</h3>
-              <div className="pdf-home-footer-socials">
-                <span>◎</span>
-                <span>f</span>
-                <span>in</span>
-                <span>X</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pdf-home-footer-copy">
-            ©2026 All right reserved. Wello healthcare Limited
-          </div>
-        </footer>
+        <HomePageFooter />
       </main>
     </>
   );

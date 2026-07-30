@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import CartNotificationPopup from "./CartNotificationPopup";
+import { isAdminAppRoute } from "../../utils/routeScope";
 
 const getCustomerId = () => {
   if (typeof window === "undefined") return null;
@@ -16,6 +18,7 @@ const getCustomerId = () => {
 };
 
 const CartNotificationHost = () => {
+  const pathname = usePathname();
   const [customerId, setCustomerId] = useState(null);
 
   useEffect(() => {
@@ -30,6 +33,10 @@ const CartNotificationHost = () => {
       window.removeEventListener("storage", syncCustomer);
     };
   }, []);
+
+  if (isAdminAppRoute(pathname)) {
+    return null;
+  }
 
   return <CartNotificationPopup currentUserId={customerId} />;
 };

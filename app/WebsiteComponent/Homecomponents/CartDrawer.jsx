@@ -13,6 +13,11 @@ import {
 import { MdHealthAndSafety } from "react-icons/md";
 import { useCart } from "../../Components/MainRoute/CartContext";
 import LoginModal from "./LoginFolder/LoginModal";
+import {
+  describeProductDemographics,
+  validatePatientForProduct,
+  validateCartPatientAssignments,
+} from "../../utils/productVisibility";
 
 const PEOPLE_STORAGE_KEY = "cartPackagePeople";
 const HOME_COLLECTION_STORAGE_KEY = "cartHomeCollectionSelected";
@@ -100,6 +105,26 @@ const CartDrawer = ({ open = true, onClose, asPage = false }) => {
 
   const getItemKey = (item) => item.cartEntryId || item._id || item.id;
 
+  const getCartItemByKey = (itemKey) =>
+    cartItems.find((item) => getItemKey(item) === itemKey);
+
+  const showPatientMismatchError = (message) => {
+    toast.error(message, { position: "top-center", autoClose: 6000 });
+  };
+
+  const validatePatientsForItem = (itemKey, patients) => {
+    const cartItem = getCartItemByKey(itemKey);
+    if (!cartItem) return { ok: true };
+
+    for (const patient of patients) {
+      const result = validatePatientForProduct(cartItem, patient);
+      if (!result.ok) {
+        return result;
+      }
+    }
+    return { ok: true };
+  };
+
   const getMissingPatientItem = () =>
     cartItems.find((item) => {
       const itemKey = getItemKey(item);
@@ -132,6 +157,17 @@ const CartDrawer = ({ open = true, onClose, asPage = false }) => {
         position: "top-center",
       });
       openPersonModal(getItemKey(missingPatientItem));
+      return;
+    }
+
+    const demographicErrors = validateCartPatientAssignments(
+      cartItems,
+      savedPeople,
+      getItemKey
+    );
+    if (demographicErrors.length > 0) {
+      event.preventDefault();
+      showPatientMismatchError(demographicErrors[0]);
       return;
     }
 
@@ -203,6 +239,12 @@ const CartDrawer = ({ open = true, onClose, asPage = false }) => {
     );
     const { itemKey } = activeForm;
 
+    const validation = validatePatientsForItem(itemKey, chosen);
+    if (!validation.ok) {
+      showPatientMismatchError(validation.message);
+      return;
+    }
+
     setSavedPeople((prev) => ({
       ...prev,
       [itemKey]: {
@@ -257,6 +299,12 @@ const CartDrawer = ({ open = true, onClose, asPage = false }) => {
       !trimmedPerson.area ||
       !/^\d{6}$/.test(trimmedPerson.pincode)
     ) return;
+
+    const validation = validatePatientsForItem(itemKey, [trimmedPerson]);
+    if (!validation.ok) {
+      showPatientMismatchError(validation.message);
+      return;
+    }
 
     // Add to global pool (no duplicates)
     setAllPatients((prev) => {
@@ -565,6 +613,20 @@ const CartDrawer = ({ open = true, onClose, asPage = false }) => {
                 <FaTimes />
               </button>
             </div>
+
+            {(() => {
+              const cartItem = getCartItemByKey(activeForm.itemKey);
+              const suitability = cartItem
+                ? describeProductDemographics(cartItem)
+                : "";
+              if (!suitability) return null;
+              return (
+                <p className="wello-patient-test-hint">
+                  This test is for <strong>{suitability}</strong>. Select patient
+                  with matching age &amp; gender (e.g. child for kids test).
+                </p>
+              );
+            })()}
 
             {/* ══ MODE: SELECT ══ */}
             {activeForm.mode === "select" && (

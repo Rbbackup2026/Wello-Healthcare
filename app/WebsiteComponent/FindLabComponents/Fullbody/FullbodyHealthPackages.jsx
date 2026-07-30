@@ -1,18 +1,26 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
   FaSearch,
 } from "react-icons/fa";
-import { Link, useNavigate } from "../../../lib/routerCompat";
+import { Link, useNavigate, useParams } from "../../../lib/routerCompat";
 import TopBar from "../../Homecomponents/TopBar";
 import Navbar from "../../Homecomponents/Navbar";
 import Footer from "../../Homecomponents/Footer";
 import { useCart } from "../../../Components/MainRoute/CartContext";
-import { useLocation } from "../../../Components/MainRoute/LocationContext";
+import { useLocation, slugifyLocation } from "../../../Components/MainRoute/LocationContext";
 import { API_BASE_URL, API_ORIGIN } from "../../../utils/api";
+import { deslugifyLocation, normalizeCityName, resolveProductPricingForCity } from "../../../utils/cityApi";
+import {
+  isFullBodyProduct,
+  isProductActive,
+  productMatchesCity,
+} from "../../../utils/productVisibility";
 import { toast } from "react-toastify";
+import DisplayPageBanner from "../../Shared/DisplayPageBanner";
+import { withProductDemographics } from "../../../utils/cartItemMeta";
 
 const extractItems = (payload) => {
   if (Array.isArray(payload)) return payload;
@@ -32,8 +40,9 @@ const isTruthy = (value) => {
   return false;
 };
 
-const getPackagePrice = (pkg) => Number(pkg.price || pkg.newPrice || 0);
-const getPackageMrp = (pkg) => Number(pkg.mrp || pkg.oldPrice || 0);
+const getPackagePricing = (pkg, city) => resolveProductPricingForCity(pkg, city);
+const getPackagePrice = (pkg, city) => getPackagePricing(pkg, city).price;
+const getPackageMrp = (pkg, city) => getPackagePricing(pkg, city).mrp;
 const getPackageTestCount = (pkg) => pkg.testCount || pkg.tests || "Multiple";
 const FULL_BODY_CATEGORY_NAME = "Full Body Health Checkup";
 
@@ -145,17 +154,47 @@ const normalizeFaqs = (faqs) => {
 
 const FullbodyHealthPackages = () => {
   const navigate = useNavigate();
+  const { citySlug } = useParams();
   const { addToCart } = useCart();
-  const { location } = useLocation();
+  const { location, setLocation } = useLocation();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [packages, setPackages] = useState([]);
   const [categoryBannerUrl, setCategoryBannerUrl] = useState("");
+  const [fullBodyCategoryId, setFullBodyCategoryId] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
   const [categoryFaqs, setCategoryFaqs] = useState([]);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
-  const cityName = location?.city || "Gurugram";
+
+  const cityName = useMemo(() => {
+    if (citySlug) {
+      return citySlug === slugifyLocation(location.city)
+        ? location.city
+        : deslugifyLocation(citySlug);
+    }
+
+    return location?.city || "Gurugram";
+  }, [citySlug, location.city]);
+
+  useEffect(() => {
+    if (!citySlug) return;
+
+    const resolvedCity =
+      citySlug === slugifyLocation(location.city)
+        ? location.city
+        : deslugifyLocation(citySlug);
+
+    if (
+      normalizeCityName(resolvedCity) !== normalizeCityName(location?.city || "")
+    ) {
+      setLocation({
+        city: resolvedCity,
+        formattedAddress: `${resolvedCity}, India`,
+        source: "url_sync",
+      });
+    }
+  }, [citySlug, location?.city, setLocation]);
 
   useEffect(() => {
     const fetchFullBodyPackages = async () => {
@@ -164,16 +203,12 @@ const FullbodyHealthPackages = () => {
         const res = await axios.get(`${API_BASE_URL}/get_product`);
         const allItems = extractItems(res.data);
         const filtered = allItems.filter((product) => {
-          const matchesFullBody =
-            isTruthy(product.showFullBodyHealthCheckup) ||
-            isTruthy(product.showFullBody);
-          const isActive =
-            isTruthy(product.isActive) || isTruthy(product.status);
-          const matchesCity =
-            !location?.city ||
-            !product.city ||
-            product.city.toLowerCase() === location.city.toLowerCase();
-          return matchesFullBody && isActive && matchesCity;
+          const matchesFullBody = isFullBodyProduct(product);
+          return (
+            matchesFullBody &&
+            isProductActive(product) &&
+            productMatchesCity(product, cityName)
+          );
         });
         setPackages(filtered);
       } catch (err) {
@@ -183,7 +218,7 @@ const FullbodyHealthPackages = () => {
       }
     };
     fetchFullBodyPackages();
-  }, [location]);
+  }, [cityName]);
 
   useEffect(() => {
     const fetchFullBodyCategory = async () => {
@@ -196,6 +231,7 @@ const FullbodyHealthPackages = () => {
             FULL_BODY_CATEGORY_NAME.toLowerCase()
         );
         setCategoryBannerUrl(getCategoryBannerUrl(fullBodyCategory));
+        setFullBodyCategoryId(fullBodyCategory?._id || "");
         setCategoryDescription(
           formatCategoryDescription(
             getCategoryDescription(fullBodyCategory),
@@ -208,6 +244,7 @@ const FullbodyHealthPackages = () => {
       } catch (err) {
         console.error("Error fetching full body category description:", err);
         setCategoryBannerUrl("");
+        setFullBodyCategoryId("");
         setCategoryDescription("");
         setCategoryFaqs([]);
       }
@@ -215,16 +252,23 @@ const FullbodyHealthPackages = () => {
     fetchFullBodyCategory();
   }, [cityName]);
 
-  const buildCartItem = (pkg, idx) => ({
-    id: `fullbody-${idx}-${pkg.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-    name: pkg.name,
-    price: pkg.price || pkg.newPrice,
-    oldPrice: pkg.mrp || pkg.oldPrice,
-    tests: pkg.testCount || pkg.tests,
-    category: "Full Body Health Checkup",
-    type: "package",
-    city: location?.city,
-  });
+  const buildCartItem = (pkg, idx) => {
+    const pricing = getPackagePricing(pkg, cityName);
+    return withProductDemographics(
+      {
+        id: pkg._id || `fullbody-${idx}-${pkg.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        _id: pkg._id,
+        name: pkg.name,
+        price: pricing.price,
+        oldPrice: pricing.offerActive && pricing.mrp > pricing.price ? pricing.mrp : undefined,
+        tests: pkg.testCount || pkg.tests,
+        category: "Full Body Health Checkup",
+        type: "package",
+        city: location?.city,
+      },
+      pkg
+    );
+  };
 
   const handleAddToCart = (pkg, idx) => {
     addToCart(buildCartItem(pkg, idx));
@@ -256,8 +300,8 @@ const FullbodyHealthPackages = () => {
     .sort((left, right) => {
       const leftName = String(left.name || "").toLowerCase();
       const rightName = String(right.name || "").toLowerCase();
-      const leftPrice = getPackagePrice(left);
-      const rightPrice = getPackagePrice(right);
+      const leftPrice = getPackagePrice(left, cityName);
+      const rightPrice = getPackagePrice(right, cityName);
 
       switch (sortBy) {
         case "name-asc":
@@ -279,6 +323,14 @@ const FullbodyHealthPackages = () => {
         <TopBar />
         <Navbar />
       </div>
+
+      <DisplayPageBanner
+        display="pathology"
+        city={cityName}
+        categoryId={fullBodyCategoryId}
+        categoryName={FULL_BODY_CATEGORY_NAME}
+        className="fb-page-banner"
+      />
 
       <div className="pdf-fullbody-section fb-page-section pb-12">
         <div className="pdf-section-inner fb-layout-wrapper">
@@ -337,8 +389,11 @@ const FullbodyHealthPackages = () => {
                 </div>
               ) : (
                 filteredPackages.map((pkg, idx) => {
-                  const price = getPackagePrice(pkg);
-                  const mrp = getPackageMrp(pkg);
+                  const pricing = getPackagePricing(pkg, cityName);
+                  const price = pricing.price;
+                  const mrp = pricing.mrp;
+                  const showMrp =
+                    pricing.offerActive && mrp > price;
 
                   return (
                     <article key={pkg._id || idx} className="pdf-product-card">
@@ -351,7 +406,7 @@ const FullbodyHealthPackages = () => {
 
                       {/* Price Row */}
                       <div className="pdf-price-row">
-                        {mrp > price && <del>₹{mrp.toLocaleString()}</del>}
+                        {showMrp && <del>₹{mrp.toLocaleString()}</del>}
                         <strong>₹{price.toLocaleString()}</strong>
                         {pkg.discount && (
                           <span className="pdf-discount-badge">

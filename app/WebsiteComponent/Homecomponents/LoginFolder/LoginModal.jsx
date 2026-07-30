@@ -7,6 +7,11 @@ import {
 } from "../../../utils/customerSession";
 import { API_BASE_URL } from "../../../utils/api";
 
+const resolveMobile = (user = {}) =>
+  user.mobileNo || user.mobile || user.phone || "";
+
+const resolveDob = (user = {}) => user.dob || user.dateOfBirth || "";
+
 const LoginModal = ({ open, onClose }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -31,8 +36,8 @@ const LoginModal = ({ open, onClose }) => {
         const user = JSON.parse(storedUser);
         setEmail(user.email || "");
         setName(user.name || "");
-        setMobileNo(user.mobileNo || "");
-        setDob(user.dob || "");
+        setMobileNo(resolveMobile(user));
+        setDob(resolveDob(user));
         setAge(user.age || "");
         setAddress(user.address || "");
         setGender(user.gender || "");
@@ -143,12 +148,15 @@ const LoginModal = ({ open, onClose }) => {
           const u = res.data.user;
           if (u && u.name) {
             // User already registered - sync and close modal with success
+            const resolvedMobile = resolveMobile(u);
+            const resolvedDob = resolveDob(u);
             const customerUser = {
               _id: u._id || u.id,
               email,
               name: u.name,
-              mobileNo: u.mobileNo,
-              dob: u.dob,
+              mobileNo: resolvedMobile,
+              phone: u.phone || resolvedMobile,
+              dob: resolvedDob,
               age: u.age,
               address: u.address,
               gender: u.gender,
@@ -158,8 +166,8 @@ const LoginModal = ({ open, onClose }) => {
             syncAuthData(customerUser);
             // ✅ Fill state with fetched user data
             setName(u.name || "");
-            setMobileNo(u.mobileNo || "");
-            setDob(u.dob || "");
+            setMobileNo(resolvedMobile);
+            setDob(resolvedDob);
             setAge(u.age || "");
             setAddress(u.address || "");
             setGender(u.gender || "");
@@ -281,19 +289,25 @@ const LoginModal = ({ open, onClose }) => {
   // ✅ UPDATED: completeLogin ab modal band NAHI karega
   // Sirf profile view mode mein le jaayega updated data ke saath
   const completeLogin = (user) => {
+    const resolvedMobile = resolveMobile(user) || mobileNo;
+    const resolvedDob = resolveDob(user) || dob;
     const customerUser = {
       _id: user?._id || user?.id,
       email,
-      name,
-      mobileNo,
-      dob,
-      age,
-      address,
-      gender,
-      displayPhone: name || email,
+      name: user?.name || name,
+      mobileNo: resolvedMobile,
+      phone: user?.phone || resolvedMobile,
+      dob: resolvedDob,
+      age: user?.age || age,
+      address: user?.address || address,
+      gender: user?.gender || gender,
+      displayPhone: user?.name || name || email,
       loginTime: new Date().toISOString(),
     };
 
+    setMobileNo(resolvedMobile);
+    setDob(resolvedDob);
+    if (user?.age) setAge(user.age);
     syncAuthData(customerUser);
 
     // ✅ Edit mode band karo - profile VIEW dikhao

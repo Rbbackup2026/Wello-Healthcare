@@ -93,7 +93,11 @@ function AdminLogin({ setIsAuthenticated }) {
     try {
       const response = await axios.post(
         toApiUrl("/login"),
-        { email: loginEmail, password: loginPassword },
+        {
+          email: loginEmail,
+          password: loginPassword,
+          keepLoggedIn,
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -131,16 +135,27 @@ function AdminLogin({ setIsAuthenticated }) {
         localStorage.setItem("adminToken", token);
         localStorage.setItem("adminUser", JSON.stringify(userData));
         localStorage.setItem("adminLoginTime", Date.now().toString());
-        
-        // Expiry time set karein based on keepLoggedIn
-        if (keepLoggedIn) {
-          const expiryTime = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days
-          localStorage.setItem("adminTokenExpiry", expiryTime.toString());
-          console.log("🕒 Token expires in 7 days");
-        } else {
-          const expiryTime = Date.now() + (24 * 60 * 60 * 1000); // 1 day
-          localStorage.setItem("adminTokenExpiry", expiryTime.toString());
-          console.log("🕒 Token expires in 1 day");
+
+        // Match local expiry to real JWT lifetime from backend
+        const expiresIn = response.data.expiresIn || (keepLoggedIn ? "7d" : "24h");
+        const match = String(expiresIn).match(/^(\d+)([dhms])$/i);
+        let expiryMs = 24 * 60 * 60 * 1000;
+        if (match) {
+          const n = parseInt(match[1], 10);
+          const unit = match[2].toLowerCase();
+          const mult = { d: 86400000, h: 3600000, m: 60000, s: 1000 }[unit] || 3600000;
+          expiryMs = n * mult;
+        }
+        // Prefer JWT exp claim when present (source of truth)
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          if (payload?.exp) {
+            localStorage.setItem("adminTokenExpiry", String(payload.exp * 1000));
+          } else {
+            localStorage.setItem("adminTokenExpiry", String(Date.now() + expiryMs));
+          }
+        } catch {
+          localStorage.setItem("adminTokenExpiry", String(Date.now() + expiryMs));
         }
 
         console.log("✅ Login successful, data saved to localStorage");

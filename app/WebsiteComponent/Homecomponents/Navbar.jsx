@@ -10,6 +10,16 @@ import axios from "axios";
 import Link from "next/link";
 import { useLocation } from "../../Components/MainRoute/LocationContext";
 import { API_BASE_URL } from "../../utils/api";
+import { extractApiArray } from "../../utils/cityApi";
+import {
+  isFullBodyProduct,
+  isPopularProduct,
+  isProductActive,
+  isRadiologyCategory,
+  isRadiologyProduct,
+  isShownInNavbar,
+  productMatchesCity,
+} from "../../utils/productVisibility";
 
 const FULL_BODY_CATEGORY = {
   _id: "full-body-health-checkup-category",
@@ -54,12 +64,7 @@ const isTruthy = (value) => {
   return false;
 };
 
-const isShownInNavbar = (category) => {
-  const value =
-    category?.showinnavbar ?? category?.showInNavbar ?? category?.showNavbar;
-
-  return value === undefined || value === null ? true : isTruthy(value);
-};
+const isShownInNavbarCategory = isShownInNavbar;
 
 const withFullBodyCategory = (items, allItems = items) => {
   const hasFullBody = allItems.some(
@@ -125,16 +130,22 @@ const Navbar = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, disRes, prodRes] = await Promise.all([
+        const [catRes, disRes, prodRes, deptRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/categories`),
           axios.get(`${API_BASE_URL}/diseasepost`),
           axios.get(`${API_BASE_URL}/get_product`),
+          axios.get(`${API_BASE_URL}/get-departments`),
         ]);
         const categoryData = Array.isArray(catRes.data) ? catRes.data : [];
+        const departmentRecords =
+          deptRes.data?.departments || extractApiArray(deptRes.data) || [];
         setCategories(
           withFullBodyCategory(
             categoryData.filter(
-              (cat) => isTruthy(cat.status) && isShownInNavbar(cat)
+              (cat) =>
+                isTruthy(cat.status) &&
+                isShownInNavbarCategory(cat) &&
+                !isRadiologyCategory(cat, departmentRecords)
             ),
             categoryData
           )
@@ -151,18 +162,14 @@ const Navbar = () => {
         setPopularTests(
           productsArray.filter((product) => {
             const matchesPackage =
-              product.showPopularPackage === "Yes" ||
-              product.showFullBodyHealthCheckup === "Yes";
-            const isActive =
-              product.status === true ||
-              product.status === "Active" ||
-              product.isActive !== false;
-            const matchesCity =
-              !location?.city ||
-              !product.city ||
-              product.city.toLowerCase() === location.city.toLowerCase();
+              isPopularProduct(product) || isFullBodyProduct(product);
 
-            return matchesPackage && isActive && matchesCity;
+            return (
+              matchesPackage &&
+              isProductActive(product) &&
+              productMatchesCity(product, location?.city || "") &&
+              !isRadiologyProduct(product, departmentRecords)
+            );
           })
         );
       } catch (err) {
@@ -186,7 +193,10 @@ const Navbar = () => {
   const activeItems = (sectionItems[activeSection] || []).slice(0, 18);
 
   return (
-    <nav className={`wello-nav-shell${megaOpen ? " is-mega-open" : ""}`}>
+    <nav
+      className={`wello-nav-shell${megaOpen ? " is-mega-open" : ""}`}
+      onMouseLeave={scheduleCloseMegaMenu}
+    >
       <div className="wello-nav-inner">
         <Link href="/" className="wello-nav-home">
           <FaHome />
@@ -195,74 +205,77 @@ const Navbar = () => {
         <div
           className="wello-nav-group"
           onMouseEnter={openMegaMenu}
-          onMouseLeave={scheduleCloseMegaMenu}
           onFocus={openMegaMenu}
         >
           <Link href="/lab-tests" className="wello-nav-primary">
             Book Your Blood Test
             <FaChevronDown className={megaOpen ? "is-open" : ""} />
           </Link>
-
-          <div className={`wello-mega-panel${megaOpen ? " is-open" : ""}`}>
-            <div className="wello-mega-menu">
-              <aside className="wello-mega-sidebar">
-                {MEGA_SECTIONS.map((section) => {
-                  const href = section.href || section.sectionHref;
-                  const isActive = activeSection === section.id;
-
-                  return (
-                    <Link
-                      key={section.id}
-                      href={href || "#"}
-                      className={`wello-mega-sidebar-item${isActive ? " is-active" : ""}`}
-                      onMouseEnter={() => setActiveSection(section.id)}
-                      onFocus={() => setActiveSection(section.id)}
-                    >
-                      <span>{section.label}</span>
-                      <FaChevronRight />
-                    </Link>
-                  );
-                })}
-              </aside>
-
-              <div className="wello-mega-content">
-                {activeSection === "fullbody" ? (
-                  <div className="wello-mega-columns">
-                    <Link href="/full-body-health-checkup" className="wello-mega-link">
-                      Full Body Checkup
-                    </Link>
-                  </div>
-                ) : activeItems.length === 0 ? (
-                  <p className="wello-mega-empty">No items available in this section.</p>
-                ) : (
-                  <div className="wello-mega-columns">
-                    {activeItems.map((item) => {
-                      const label = item.name || item.title || "Item";
-                      return (
-                        <Link
-                          key={item._id || label}
-                          href={getItemHref(item, activeSectionConfig?.type)}
-                          className="wello-mega-link"
-                        >
-                          {label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
 
         <Link href="/full-body-health-checkup" className="wello-nav-item">
           Full Body Health Checkup
           <FaChevronRight />
         </Link>
-        <Link href="/download-report" className="wello-nav-item">
+        <Link href="/schedule-scan" className="wello-nav-item">
           Schedule Scan
           <FaChevronRight />
         </Link>
+      </div>
+
+      <div
+        className={`wello-mega-panel${megaOpen ? " is-open" : ""}`}
+        onMouseEnter={openMegaMenu}
+        onFocus={openMegaMenu}
+      >
+        <div className="wello-mega-menu">
+          <aside className="wello-mega-sidebar">
+            {MEGA_SECTIONS.map((section) => {
+              const href = section.href || section.sectionHref;
+              const isActive = activeSection === section.id;
+
+              return (
+                <Link
+                  key={section.id}
+                  href={href || "#"}
+                  className={`wello-mega-sidebar-item${isActive ? " is-active" : ""}`}
+                  onMouseEnter={() => setActiveSection(section.id)}
+                  onFocus={() => setActiveSection(section.id)}
+                >
+                  <span>{section.label}</span>
+                  <FaChevronRight />
+                </Link>
+              );
+            })}
+          </aside>
+
+          <div className="wello-mega-content">
+            {activeSection === "fullbody" ? (
+              <div className="wello-mega-columns">
+                <Link href="/full-body-health-checkup" className="wello-mega-link">
+                  Full Body Checkup
+                </Link>
+              </div>
+            ) : activeItems.length === 0 ? (
+              <p className="wello-mega-empty">No items available in this section.</p>
+            ) : (
+              <div className="wello-mega-columns">
+                {activeItems.map((item) => {
+                  const label = item.name || item.title || "Item";
+                  return (
+                    <Link
+                      key={item._id || label}
+                      href={getItemHref(item, activeSectionConfig?.type)}
+                      className="wello-mega-link"
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </nav>
   );

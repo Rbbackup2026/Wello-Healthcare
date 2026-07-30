@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Typography,
@@ -18,11 +19,7 @@ import {
 import { styled } from "@mui/material/styles";
 import JoditEditor from "jodit-react";
 import axios from "axios";
-import { API_BASE_URL } from "../../utils/api";
-
-
-
-
+import { API_BASE_URL, toAssetUrl } from "../../utils/api";
 
 const ImageBox = styled(Box)(() => ({
   border: "1px solid #ccc",
@@ -40,66 +37,142 @@ const FullCoverAvatar = styled(Avatar)(() => ({
   objectFit: "cover",
 }));
 
-const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
+const getDefaultFormValues = () => ({
+  name: "",
+  homeCollection: "No",
+  sortOrder: "1",
+  status: "Active",
+  description: "",
+  image: "",
+});
+
+const DepartmentFormDialog = ({
+  open,
+  handleClose,
+  initialData,
+  fetchDepartments,
+}) => {
   const editorRef = useRef(null);
   const imageInputRef = useRef(null);
 
-  const [formValues, setFormValues] = useState({
-    name: "",
-    homeCollection: "No",
-    sortOrder: "",
-    status: "Active",
-    description: "",
-    image: "",
-  });
+  const [formValues, setFormValues] = useState(getDefaultFormValues());
+  const [existingImage, setExistingImage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (initialData) {
+      setFormValues({
+        name: initialData.name || "",
+        homeCollection: initialData.homeCollection || "No",
+        sortOrder: String(initialData.sortOrder || "1"),
+        status: initialData.status ? "Active" : "Inactive",
+        description: initialData.description || "",
+        image: "",
+      });
+      setExistingImage(initialData.image || "");
+    } else {
+      setFormValues(getDefaultFormValues());
+      setExistingImage("");
+    }
+
+    setError("");
+  }, [open, initialData]);
 
   const triggerInput = () => {
     if (imageInputRef.current) imageInputRef.current.click();
   };
 
   const handleImageUpload = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (file) {
       setFormValues((prev) => ({ ...prev, image: file }));
+      setError("");
     }
   };
 
   const handleInputChange = (field) => (event) => {
-    setFormValues({ ...formValues, [field]: event.target.value });
+    setFormValues((prev) => ({ ...prev, [field]: event.target.value }));
+    setError("");
   };
 
   const handleDescriptionChange = (newContent) => {
     setFormValues((prev) => ({ ...prev, description: newContent }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("name", formValues.name);
-      formData.append("homeCollection", formValues.homeCollection);
-      formData.append("sortOrder", formValues.sortOrder);
-      formData.append("status", formValues.status);
-      formData.append("description", formValues.description);
-      if (formValues.image) formData.append("image", formValues.image);
-
-      const res = await axios.post(
-        `${API_BASE_URL}/create-department`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      console.log("Saved Successfully:", res.data);
-      handleClose();
-    } catch (error) {
-      console.error("Error submitting department form:", error);
+  const getPreviewImage = () => {
+    if (formValues.image instanceof File) {
+      return URL.createObjectURL(formValues.image);
     }
+
+    if (existingImage) {
+      return toAssetUrl(existingImage);
+    }
+
+    return "https://via.placeholder.com/1000x1000?text=Upload+Image";
   };
 
-//   hooks
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
+      if (!formValues.name.trim()) {
+        setError("Department name is required.");
+        return;
+      }
 
+      if (!formValues.sortOrder) {
+        setError("Sort order is required.");
+        return;
+      }
+
+      const hasNewImage = formValues.image instanceof File;
+      if (!initialData && !hasNewImage) {
+        setError("Department image is required. Please select an image before submitting.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("name", formValues.name.trim());
+      formData.append("homeCollection", formValues.homeCollection);
+      formData.append("sortOrder", String(formValues.sortOrder));
+      formData.append("status", formValues.status === "Active" ? "true" : "false");
+      formData.append("description", formValues.description || "");
+
+      if (hasNewImage) {
+        formData.append("image", formValues.image);
+      }
+
+      const response = initialData
+        ? await axios.put(
+            `${API_BASE_URL}/update-department/${initialData._id}`,
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          )
+        : await axios.post(`${API_BASE_URL}/create-department`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+      if (fetchDepartments) {
+        await fetchDepartments();
+      }
+
+      console.log("Saved Successfully:", response.data);
+      handleClose();
+    } catch (submitError) {
+      console.error("Error submitting department form:", submitError);
+      setError(
+        submitError.response?.data?.error ||
+          submitError.response?.data?.message ||
+          "Failed to save department. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Dialog
@@ -109,10 +182,17 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
       fullWidth
       scroll="paper"
     >
-      <DialogTitle>Department Form</DialogTitle>
+      <DialogTitle>
+        {initialData ? "Edit Department" : "Create Department"}
+      </DialogTitle>
       <DialogContent dividers>
+        {error ? (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        ) : null}
+
         <Grid container spacing={2} mt={1}>
-          {/* Name */}
           <Grid item xs={12}>
             <TextField
               label="Name"
@@ -120,23 +200,16 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
               required
               value={formValues.name}
               onChange={handleInputChange("name")}
+              disabled={loading}
             />
           </Grid>
 
-          {/* Image Upload */}
           <Grid item xs={12} sm={6}>
             <Typography variant="body2" gutterBottom>
-              Image (Size : 1000 x 1000 Px.)
+              Image (Size: 1000 x 1000 Px.) *
             </Typography>
             <ImageBox sx={{ aspectRatio: "1 / 1", maxWidth: 150 }}>
-              <FullCoverAvatar
-                variant="square"
-                src={
-                  formValues.image
-                    ? URL.createObjectURL(formValues.image)
-                    : "https://via.placeholder.com/1000x1000?text=No+Image"
-                }
-              />
+              <FullCoverAvatar variant="square" src={getPreviewImage()} />
               <input
                 type="file"
                 accept="image/*"
@@ -150,13 +223,13 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
                 sx={{ border: "1px solid #ccc" }}
                 size="small"
                 onClick={triggerInput}
+                disabled={loading}
               >
                 Select Image
               </Button>
             </Box>
           </Grid>
 
-          {/* Home Collection Option */}
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Home Collection Option?</InputLabel>
@@ -164,6 +237,7 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
                 value={formValues.homeCollection}
                 onChange={handleInputChange("homeCollection")}
                 label="Home Collection Option?"
+                disabled={loading}
               >
                 <MenuItem value="Yes">Yes</MenuItem>
                 <MenuItem value="No">No</MenuItem>
@@ -171,14 +245,14 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
             </FormControl>
           </Grid>
 
-          {/* Sort Order */}
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
+            <FormControl fullWidth required>
               <InputLabel>Sort Order</InputLabel>
               <Select
                 value={formValues.sortOrder}
                 onChange={handleInputChange("sortOrder")}
                 label="Sort Order"
+                disabled={loading}
               >
                 <MenuItem value="1">1</MenuItem>
                 <MenuItem value="2">2</MenuItem>
@@ -188,7 +262,6 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
             </FormControl>
           </Grid>
 
-          {/* Status */}
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
@@ -196,6 +269,7 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
                 value={formValues.status}
                 onChange={handleInputChange("status")}
                 label="Status"
+                disabled={loading}
               >
                 <MenuItem value="Active">Active</MenuItem>
                 <MenuItem value="Inactive">Inactive</MenuItem>
@@ -203,7 +277,6 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
             </FormControl>
           </Grid>
 
-          {/* Description */}
           <Grid item xs={12}>
             <Typography variant="body2" gutterBottom>
               Description
@@ -256,13 +329,17 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
             </Box>
           </Grid>
 
-          {/* Buttons */}
           <Grid
             item
             xs={12}
             sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
           >
-            <Button variant="outlined" color="error" onClick={handleClose}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleClose}
+              disabled={loading}
+            >
               Close
             </Button>
             <Button
@@ -270,8 +347,9 @@ const DepartmentFormDialog = ({ open, handleClose, initialData }) => {
               color="primary"
               onClick={handleSubmit}
               sx={{ ml: 1 }}
+              disabled={loading}
             >
-              Submit
+              {loading ? "Saving..." : "Submit"}
             </Button>
           </Grid>
         </Grid>

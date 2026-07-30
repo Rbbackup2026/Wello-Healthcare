@@ -19,6 +19,20 @@ import {
 } from "../../utils/walletStorage";
 import { normalizeAddressList, readLocalAddresses } from "../../utils/savedAddressStorage";
 import { API_BASE_URL } from "../../utils/api";
+import { useLocation } from "../../Components/MainRoute/LocationContext";
+import { resolveProductPricingForCity } from "../../utils/cityApi";
+import { validateCartPatientAssignments } from "../../utils/productVisibility";
+import { withProductDemographics } from "../../utils/cartItemMeta";
+import {
+  calculateCouponDiscount,
+  filterCouponsForCart,
+  filterNonExpiredCoupons,
+  formatCouponRestrictions,
+  getEligibleCartSubtotal,
+  isCouponExpired,
+  validateCouponForCart,
+} from "../../utils/couponUtils";
+import { convertLeadByPhone } from "../../utils/leadStorage";
 
 const BOOKING_STORAGE_KEY = "labBookingDetails";
 const PACKAGE_PEOPLE_STORAGE_KEY = "cartPackagePeople";
@@ -150,10 +164,13 @@ const formatCouponDescription = (coupon) => {
     coupon.discountType === "percentage"
       ? `${coupon.discountValue}% Off`
       : `Rs ${coupon.discountValue} Off`;
-  if (coupon.minAmount) {
-    return `Get ${offer} on your booking above ₹${coupon.minAmount} or more`;
-  }
-  return `Get ${offer} on your booking`;
+  const baseText = coupon.minAmount
+    ? `Get ${offer} on eligible items above Rs ${coupon.minAmount}`
+    : `Get ${offer} on eligible items`;
+  const restrictions = formatCouponRestrictions(coupon);
+  return restrictions === "Valid on all cities and products"
+    ? baseText
+    : `${baseText}. ${restrictions}`;
 };
 
 const formatCouponExpiry = (expiry) => {
@@ -195,7 +212,8 @@ const CouponPopup = ({ coupon, savedAmount, onClose }) => {
 };
 
 const CartPage = () => {
-  const { cartItems, decreaseQty, increaseQty, removeItem, clearCart } = useCart();
+  const { cartItems, decreaseQty, increaseQty, removeItem, clearCart, addToCart } = useCart();
+  const { location } = useLocation();
   const router = useAppRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
@@ -207,7 +225,7 @@ const CartPage = () => {
   const addressPickerRef = useRef(null);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [allCoupons, setAllCoupons] = useState([]);
   const [showCartDetails, setShowCartDetails] = useState(true);
   const [showSchedule, setShowSchedule] = useState(true);
   const [showTimeSlots, setShowTimeSlots] = useState(false);
@@ -218,7 +236,17 @@ const CartPage = () => {
   const [useWallet, setUseWallet] = useState(false);
   const [walletCoinsToUse, setWalletCoinsToUse] = useState(0);
   const [homeCollectionSelected, setHomeCollectionSelected] = useState(readHomeCollectionSelected);
+  const [recommendedTests, setRecommendedTests] = useState([]);
   const lastCustomerIdentityRef = useRef(null);
+
+  const fetchCartCoupons = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/all?forCart=true`);
+      setAllCoupons(filterNonExpiredCoupons(response.data.coupons || []));
+    } catch {
+      setAllCoupons([]);
+    }
+  };
 
   const fetchWalletForUser = async (userId) => {
     if (!userId) {
@@ -278,10 +306,7 @@ const CartPage = () => {
         setIsLoggedIn(true);
         const userId = parsedUser._id || parsedUser.id;
         fetchWalletForUser(userId);
-        axios
-          .get(`${API_BASE_URL}/all`)
-          .then((res) => setAvailableCoupons((res.data.coupons || []).filter((coupon) => coupon.active)))
-          .catch(() => setAvailableCoupons([]));
+        fetchCartCoupons();
 
         if (previousIdentity !== currentIdentity) {
           axios
@@ -348,13 +373,100 @@ const CartPage = () => {
     };
   }, []);
 
+  // Load recommended tests linked from admin → cart items
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRecommendedTests = async () => {
+      const cartIds = [
+        ...new Set(
+          cartItems
+            .map((item) => String(item._id || item.id || ""))
+            .filter((id) => /^[0-9a-fA-F]{24}$/.test(id))
+        ),
+      ];
+
+      if (cartIds.length === 0) {
+        setRecommendedTests([]);
+        return;
+      }
+
+      try {
+        const responses = await Promise.all(
+          cartIds.map((id) =>
+            axios.get(`${API_BASE_URL}/get_product/${id}`).catch(() => null)
+          )
+        );
+
+        const cartIdSet = new Set(cartIds);
+        const byId = new Map();
+
+        responses.forEach((response) => {
+          const product = response?.data?.data;
+          const recs = Array.isArray(product?.recommendedTests)
+            ? product.recommendedTests
+            : [];
+
+          recs.forEach((rec) => {
+            if (!rec || typeof rec !== "object" || !rec._id) return;
+            if (rec.status === false || rec.isActive === false) return;
+            const recId = String(rec._id);
+            if (cartIdSet.has(recId)) return;
+            if (!byId.has(recId)) byId.set(recId, rec);
+          });
+        });
+
+        if (!cancelled) {
+          setRecommendedTests(Array.from(byId.values()));
+        }
+      } catch {
+        if (!cancelled) setRecommendedTests([]);
+      }
+    };
+
+    loadRecommendedTests();
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItems]);
+
+  const handleAddRecommendedTest = (product) => {
+    const pricing = resolveProductPricingForCity(product, location?.city || "");
+    addToCart(
+      withProductDemographics(
+        {
+          id: product._id,
+          _id: product._id,
+          name: product.name,
+          price: pricing.price || Number(product.price) || 0,
+          testCount: product.testCount || 1,
+          tests: product.testCount || 1,
+          type: product.itemType || "Test",
+          city: pricing.city || location?.city || "",
+          category: product.category?.name || product.category || "General",
+        },
+        product
+      )
+    );
+    toast.success(`${product.name} added to cart`, {
+      position: "top-right",
+      autoClose: 1500,
+      theme: "colored",
+    });
+  };
+
   const subtotal = cartItems.reduce((total, item) => total + item.price * item.qty, 0);
   const homeCollectionCharge = homeCollectionSelected && cartItems.length > 0 ? 150 : 0;
-  const discountAmount = appliedCoupon
-    ? appliedCoupon.discountType === "percentage"
-      ? Math.min((subtotal * appliedCoupon.discountValue) / 100, appliedCoupon.maxDiscount || Infinity)
-      : appliedCoupon.discountValue
+  const couponEligibleSubtotal = appliedCoupon
+    ? getEligibleCartSubtotal(cartItems, appliedCoupon)
     : 0;
+  const discountAmount = appliedCoupon
+    ? calculateCouponDiscount(appliedCoupon, couponEligibleSubtotal)
+    : 0;
+  const availableCoupons = filterCouponsForCart(allCoupons, {
+    city: location?.city || "",
+    cartItems,
+  });
   const payableBeforeWallet = Math.max(0, subtotal + homeCollectionCharge - discountAmount);
   const activeWalletSettings = walletSettings || DEFAULT_WALLET_SETTINGS;
   const coinValue = Number(activeWalletSettings.coinValue || 1);
@@ -464,21 +576,77 @@ const CartPage = () => {
     });
   }, [maxWalletCoins, useWallet]);
 
-  const handleApplyCoupon = (code) => {
-    const target = code || couponCode;
-    const coupon = availableCoupons.find(
-      (entry) => entry.code.toUpperCase() === target.toUpperCase().trim()
-    );
-    if (!coupon) return toast.error("Invalid coupon code.");
-    if (subtotal < coupon.minAmount) return toast.warn(`Min. amount needed: Rs. ${coupon.minAmount}`);
-    setAppliedCoupon(coupon);
-    setCouponCode(coupon.code);
-    const saved =
-      coupon.discountType === "percentage"
-        ? Math.min((subtotal * coupon.discountValue) / 100, coupon.maxDiscount || Infinity)
-        : coupon.discountValue;
-    setCouponPopup({ coupon, savedAmount: saved });
-    setCouponModalOpen(false);
+  useEffect(() => {
+    if (!appliedCoupon) return;
+
+    const validation = validateCouponForCart(appliedCoupon, {
+      city: location?.city || "",
+      cartItems,
+    });
+
+    if (!validation.valid) {
+      setAppliedCoupon(null);
+      setCouponPopup(null);
+      setCouponCode("");
+      toast.warn(validation.message);
+    }
+  }, [appliedCoupon, cartItems, location?.city]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setAllCoupons((previousCoupons) => filterNonExpiredCoupons(previousCoupons));
+
+      if (appliedCoupon && isCouponExpired(appliedCoupon)) {
+        setAppliedCoupon(null);
+        setCouponPopup(null);
+        setCouponCode("");
+        toast.warn("Applied coupon has expired and was removed.");
+      }
+    }, 60000);
+
+    return () => window.clearInterval(intervalId);
+  }, [appliedCoupon]);
+
+  const openCouponModal = async () => {
+    await fetchCartCoupons();
+    setCouponModalOpen(true);
+  };
+
+  const handleApplyCoupon = async (code) => {
+    const target = (code || couponCode).trim();
+    if (!target) {
+      toast.error("Enter a coupon code.");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      toast.warn("Add items to your cart before applying a coupon.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/apply`, {
+        code: target,
+        cartTotal: subtotal,
+        city: location?.city || "",
+        cartItems: cartItems.map((item) => ({
+          id: item.id || item._id,
+          price: item.price,
+          qty: item.qty,
+        })),
+      });
+
+      const coupon = response.data?.coupon;
+      const saved = response.data?.discount || 0;
+
+      setAppliedCoupon(coupon);
+      setCouponCode(coupon?.code || target);
+      setCouponPopup({ coupon, savedAmount: saved });
+      setCouponModalOpen(false);
+      toast.success(response.data?.message || "Coupon applied successfully");
+    } catch (applyError) {
+      toast.error(applyError.response?.data?.message || "Invalid coupon code.");
+    }
   };
 
   const selectedCollectionAddress =
@@ -561,6 +729,20 @@ const CartPage = () => {
       toast.error("Please add patient details for every cart item first.", { position: "top-center" });
       return false;
     }
+
+    const demographicErrors = validateCartPatientAssignments(
+      cartItems,
+      packagePeople,
+      (item) => item.cartEntryId || item._id || item.id
+    );
+    if (demographicErrors.length > 0) {
+      toast.error(demographicErrors[0], {
+        position: "top-center",
+        autoClose: 6000,
+      });
+      return false;
+    }
+
     if (!orderDetails.address?.trim()) {
       toast.error("Please select a sample collection address.", { position: "top-center" });
       return false;
@@ -633,10 +815,10 @@ const CartPage = () => {
         dateOfBirth: primaryPerson.dateOfBirth || "",
         relation: primaryPerson.relation || "",
         address: personAddress,
-        state: primaryPerson.state || "",
-        city: primaryPerson.city || "",
-        area: primaryPerson.area || "",
-        pincode: primaryPerson.pincode || "",
+        state: location?.state || primaryPerson.state || orderDetails.state || "",
+        city: location?.city || primaryPerson.city || orderDetails.city || "",
+        area: primaryPerson.area || orderDetails.area || "",
+        pincode: primaryPerson.pincode || orderDetails.pincode || "",
         landmark: primaryPerson.area || "",
         slotDate: orderDetails.slotDate,
         slotTime: orderDetails.slotTime,
@@ -689,6 +871,26 @@ const CartPage = () => {
       writeAbandonedCarts(nextRecords);
       localStorage.removeItem(PACKAGE_PEOPLE_STORAGE_KEY);
       clearCart();
+
+      const itemNames = cartItems
+        .map((item) => item.name)
+        .filter(Boolean)
+        .slice(0, 5)
+        .join(", ");
+
+      convertLeadByPhone(
+        orderPayload.mobileNumber || orderPayload.phone || user.mobileNo || user.phone,
+        [
+          orderId ? `Order ID: ${orderId}` : "",
+          itemNames ? `Booked: ${itemNames}` : "Order placed",
+          orderPayload.slotDate
+            ? `Slot: ${orderPayload.slotDate} ${orderPayload.slotTime || ""}`.trim()
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" | ")
+      ).catch(() => {});
+
       toast.success(
         earnedCoins > 0
           ? `Order placed! You earned ${earnedCoins} wallet coins for your next booking.`
@@ -861,6 +1063,54 @@ const CartPage = () => {
                     </div>
                   )}
                 </div>
+
+                {recommendedTests.length > 0 && (
+                  <div className="cart-recommended-section">
+                    <h2 className="cart-recommended-title">Recommended Tests</h2>
+                    <p className="cart-recommended-subtitle">
+                      Frequently booked with items in your cart
+                    </p>
+                    <div className="cart-recommended-list">
+                      {recommendedTests.map((product) => {
+                        const pricing = resolveProductPricingForCity(
+                          product,
+                          location?.city || ""
+                        );
+                        const price = pricing.price || Number(product.price) || 0;
+                        const mrp = pricing.mrp || Number(product.mrp) || 0;
+
+                        return (
+                          <div key={product._id} className="cart-recommended-card">
+                            <div className="cart-recommended-card-info">
+                              <h3 className="cart-recommended-card-name">{product.name}</h3>
+                              <p className="cart-recommended-card-meta">
+                                Includes {product.testCount || 1} Test
+                                {Number(product.testCount || 1) > 1 ? "s" : ""}
+                              </p>
+                              <div className="cart-recommended-card-price-row">
+                                <strong className="cart-recommended-card-price">
+                                  Rs. {price}
+                                </strong>
+                                {mrp > price ? (
+                                  <span className="cart-recommended-card-mrp">
+                                    Rs. {mrp}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className="cart-recommended-add-btn"
+                              onClick={() => handleAddRecommendedTest(product)}
+                            >
+                              Add
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <div className={`cart-schedule-panel ${showSchedule ? "is-open" : ""}`}>
                   <button
@@ -1084,7 +1334,7 @@ const CartPage = () => {
                       </div>
                       <button
                         type="button"
-                        onClick={() => setCouponModalOpen(true)}
+                        onClick={openCouponModal}
                         className="cart-sidebar-available-link"
                       >
                         Available coupon

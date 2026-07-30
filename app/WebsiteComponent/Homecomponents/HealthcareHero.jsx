@@ -4,6 +4,8 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { API_BASE_URL, API_ORIGIN } from "../../utils/api";
+import { extractApiArray } from "../../utils/cityApi";
+import { isHomeEligibleBanner } from "../../utils/bannerApi";
 
 // â”€â”€ Quick Actions (static) â”€â”€
 const quickActions = [
@@ -17,7 +19,7 @@ const quickActions = [
     title: "Book Scans",
     desc: "700+ Labs",
     icon: "/images/mriscan.png",
-    href: "/download-report",
+    href: "/schedule-scan",
   },
   {
     title: "Book with Prescription",
@@ -78,10 +80,12 @@ const HeroBannerSlider = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res  = await fetch(`${API_BASE_URL}/banner/getall?display=home&status=Active`);
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          const apiBanners = data.sort((a, b) => a.sortId - b.sortId);
+        const res = await fetch(`${API_BASE_URL}/banner/getall?display=home&status=Active`);
+        const payload = await res.json();
+        const data = extractApiArray(payload)
+          .filter(isHomeEligibleBanner);
+        if (data.length > 0) {
+          const apiBanners = data.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
           setSlides([{ type: "static" }, ...apiBanners]);
         }
       } catch (e) {

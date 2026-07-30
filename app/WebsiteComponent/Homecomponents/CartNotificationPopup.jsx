@@ -4,20 +4,22 @@ import React, { useEffect, useState } from "react";
 import { Button, Paper, Typography, IconButton, Stack } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { useNavigate } from "../../lib/routerCompat";
+import { useNavigate, useLocation } from "../../lib/routerCompat";
 import { useCart } from "../../Components/MainRoute/CartContext";
 import axios from "axios";
 import { API_BASE_URL } from "../../utils/api";
+import { isAdminAppRoute } from "../../utils/routeScope";
 
 const CartNotificationPopup = ({ currentUserId }) => {
   const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { cartItems } = useCart();
   const hasCartItems = Array.isArray(cartItems) && cartItems.length > 0;
+  const isAdminRoute = isAdminAppRoute(pathname);
 
   const fetchNotifications = async () => {
-    if (!currentUserId || !hasCartItems) {
-      console.log("Skipping notification fetch because user has no cart items or user is not logged in.");
+    if (isAdminRoute || !currentUserId || !hasCartItems) {
       setNotification(null);
       return;
     }
@@ -53,6 +55,11 @@ const CartNotificationPopup = ({ currentUserId }) => {
   };
 
   useEffect(() => {
+    if (isAdminRoute) {
+      setNotification(null);
+      return undefined;
+    }
+
     if (currentUserId && hasCartItems) {
       fetchNotifications();
       const interval = setInterval(fetchNotifications, 1000000);
@@ -61,7 +68,7 @@ const CartNotificationPopup = ({ currentUserId }) => {
 
     setNotification(null);
     return undefined;
-  }, [currentUserId, hasCartItems]);
+  }, [currentUserId, hasCartItems, isAdminRoute]);
 
   const handleDismiss = () => setNotification(null);
 
@@ -82,7 +89,7 @@ const CartNotificationPopup = ({ currentUserId }) => {
     navigate("/cart_section");
   };
 
-  if (!notification || !hasCartItems) return null;
+  if (isAdminRoute || !notification || !hasCartItems) return null;
 
   return (
     <Paper

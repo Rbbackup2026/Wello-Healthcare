@@ -13,6 +13,7 @@ import axios from "axios";
 
 import BannerFormDialog from "./BannerFormDialog";
 import { buildBannerImageUrl } from "../../utils/bannerImageUtils";
+import { getBannerDisplayLabel, getPathologyTargetLabel, getRadiologyTargetLabel, getBannerCitiesLabel } from "../../utils/bannerApi";
 import { API_BASE_URL } from "../../utils/api";
 
 const AdminCarouselUpload = () => {
@@ -83,10 +84,19 @@ const AdminCarouselUpload = () => {
   };
 
   // ✅ Search display/city se karo kyunki title field nahi hai
-  const filtered = banners.filter((b) =>
-    b.display?.toLowerCase().includes(search.toLowerCase()) ||
-    b.city?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = banners.filter((b) => {
+    const displayLabel = getBannerDisplayLabel(b).toLowerCase();
+    const pathologyLabel = getPathologyTargetLabel(b).toLowerCase();
+    const radiologyLabel = getRadiologyTargetLabel(b).toLowerCase();
+    const searchValue = search.toLowerCase();
+    return (
+      displayLabel.includes(searchValue) ||
+      b.city?.toLowerCase().includes(searchValue) ||
+      getBannerCitiesLabel(b).toLowerCase().includes(searchValue) ||
+      pathologyLabel.includes(searchValue) ||
+      radiologyLabel.includes(searchValue)
+    );
+  });
 
   return (
     <Box p={3}>
@@ -121,7 +131,7 @@ const AdminCarouselUpload = () => {
               <TableCell>Web Image</TableCell>
               <TableCell>App Image</TableCell>
               <TableCell>Display</TableCell>
-              <TableCell>City</TableCell>
+              <TableCell>Locations</TableCell>
               <TableCell>Sort ID</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
@@ -175,8 +185,22 @@ const AdminCarouselUpload = () => {
                       ) : "—"}
                     </TableCell>
 
-                    <TableCell>{b.display || "—"}</TableCell>
-                    <TableCell>{b.city || "—"}</TableCell>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2">{getBannerDisplayLabel(b)}</Typography>
+                        {getPathologyTargetLabel(b) ? (
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            {getPathologyTargetLabel(b)}
+                          </Typography>
+                        ) : null}
+                        {getRadiologyTargetLabel(b) ? (
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            {getRadiologyTargetLabel(b)}
+                          </Typography>
+                        ) : null}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{getBannerCitiesLabel(b)}</TableCell>
                     <TableCell>{b.sortId ?? "—"}</TableCell>
 
                     {/* ✅ status field */}
