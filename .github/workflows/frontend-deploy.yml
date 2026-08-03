@@ -1,51 +1,44 @@
-name: Frontend Deploy
+name: Deploy Wello Frontend
 
 on:
   push:
     branches:
       - main
 
-concurrency:
-  group: frontend-deploy
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy Frontend
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.2
+
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          port: 22
-          timeout: 60s
-          command_timeout: 30m
+          port: ${{ secrets.PORT }}
+
           script: |
             set -e
 
-            echo "Starting frontend deployment..."
+            echo "📂 Moving to project..."
+            cd /var/www/Wello-Healthcare
 
-            cd /var/www/frontend/Wello-Healthcare
-
+            echo "⬇️ Pulling latest code..."
             git fetch origin
             git reset --hard origin/main
 
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            echo "📦 Installing dependencies..."
+            npm install
 
-            nvm use 20
-
-            export NODE_OPTIONS="--max-old-space-size=2048"
-
-            npm install --legacy-peer-deps --no-audit --no-fund
-
+            echo "🏗️ Building Next.js application..."
             npm run build
 
-            pm2 restart wello --update-env
+            echo "🚀 Restarting PM2..."
+            pm2 restart wello-frontend
 
+            echo "💾 Saving PM2..."
             pm2 save
 
-            echo "Frontend deployment completed successfully"
+            echo "✅ Wello Frontend deployed successfully."
