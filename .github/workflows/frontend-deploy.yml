@@ -12,27 +12,25 @@ jobs:
     steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.2
-
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
-
           script: |
             set -e
 
             echo "📂 Moving to project..."
             cd /var/www/Wello-Healthcare
 
-            echo "⬇️ Pulling latest code..."
+            echo "⬇️ Fetching latest code..."
             git fetch origin
             git reset --hard origin/main
 
             echo "📦 Installing dependencies..."
             npm install
 
-            echo "🏗️ Building Next.js application..."
+            echo "🏗️ Building Next.js..."
             npm run build
 
             echo "🚀 Restarting PM2..."
@@ -41,4 +39,4 @@ jobs:
             echo "💾 Saving PM2..."
             pm2 save
 
-            echo "✅ Wello Frontend deployed successfully."
+            echo "✅ Frontend deployed successfully!"
