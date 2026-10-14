@@ -1,42 +1,67 @@
+
 name: Deploy Wello Frontend
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wello-frontend-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            set -e
+      - name: Deploy to AWS EC2
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          set -eu
 
-            echo "📂 Moving to project..."
-            cd /var/www/Wello-Healthcare
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
 
-            echo "⬇️ Fetching latest code..."
-            git fetch origin
-            git reset --hard origin/main
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
 
-            echo "📦 Installing dependencies..."
-            npm install
+          ssh-keyscan -p "$PORT" -H "$HOST" \
+            >> ~/.ssh/known_hosts
 
-            echo "🏗️ Building Next.js..."
-            npm run build
+          ssh -i ~/.ssh/deploy_key \
+            -p "$PORT" \
+            -o BatchMode=yes \
+            "$USERNAME@$HOST" 'bash -se' <<'REMOTE'
+          set -eu
 
-            echo "🚀 Restarting PM2..."
-            pm2 restart wello-frontend
+          cd /var/www/Wello-Healthcare
 
-            echo "💾 Saving PM2..."
-            pm2 save
+          git fetch origin main
+          git reset --hard origin/main
 
-            echo "✅ Frontend deployed successfully!"
+          npm ci --legacy-peer-deps
+          npm run build
+
+          if pm2 describe wello-frontend >/dev/null 2>&1; then
+            pm2 reload wello-frontend --update-env
+          else
+            pm2 start npm --name wello-frontend -- start
+          fi
+
+          pm2 save
+          curl --fail --silent --show-error \
+            http://127.0.0.1:3000/ >/dev/null
+
+          echo "Frontend deployment successful"
+          REMOTE
+
+          rm -f ~/.ssh/deploy_key
